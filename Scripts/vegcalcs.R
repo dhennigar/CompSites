@@ -1,5 +1,5 @@
-#R code for shifting data from long to wide, calculating richness/plot, and simpson's and shannon's diversity/plot. For this example I have two datasets (Frenchies and Ref) for example. 
-#Loading Libraries
+#R code for shifting data from long to wide, calculating richness/plot, and simpson's and shannon's diversity/plot.
+
 library("dplyr")
 library("tidyverse")
 library("BiodiversityR")
