@@ -6,17 +6,17 @@ library("BiodiversityR")
 
 
 #create and prep Comp dataset and subsets
-Comp <- read.csv("C:/Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/09-006.csv")
+Comp <- read.csv("~/Documents/GitHub/CompSites/FieldData/09-006.csv")
 Comp$PERCENT_COVER = as.numeric(Comp$PERCENT_COVER)
-Comp <- subset(Comp, select = c(-COMMENTS, -ï..Site_Number, -MAX_LH_CM), Comp$COMMUNITY == 1) # Community 1, all species subset
+Comp <- subset(Comp, select = c(-COMMENTS, -Site_Number, -MAX_LH_CM), Comp$COMMUNITY == 1) # Community 1, all species subset
 Comp.N <- subset(Comp, Comp$ORIGIN == "N", select = c(-ORIGIN, -COMMUNITY)) # native species subset
 Comp <- subset(Comp, select = c(-ORIGIN, -COMMUNITY)) # remove origin column
 
 
 #create and prep reference site dataset
-Ref <- read.csv("C:/Users/Ownder/OneDrive/Documents/GitHub/FieldData/REFERENCE_DIVERSITY.csv")
+Ref <- read.csv("~/Documents/GitHub/FieldData/REFERENCE_DIVERSITY.csv")
 Ref$PERCENT_COVER = as.numeric(Ref$PERCENT_COVER)
-Ref <- subset(Ref, select = c(-COMMENTS, -ï..Site_Number, -MAX_LH_CM), Ref$COMMUNITY == 1)
+Ref <- subset(Ref, select = c(-COMMENTS, -Site_Number, -MAX_LH_CM), Ref$COMMUNITY == 1)
 Ref.N <- subset(Ref, Ref$ORIGIN == "N", select = c(-ORIGIN, -COMMUNITY))
 Ref <- subset(Ref, select = c(-ORIGIN, -COMMUNITY)) 
 
@@ -55,23 +55,13 @@ RefSimp <- diversity(Ref.Wide, "simpson")
 CompShan <- diversity(Comp.Wide, "shannon")
 RefShan <- diversity(Ref.Wide, "shannon")
 
-#calculating mean simpsons diversity of each site
+#calculating mean diversity of each site
 mean(CompSimp)
 mean(RefSimp)
 
+mean(CompShan)
+mean(RefShan)
+
+
 #export diversity tables
 write.csv(CompSimp, file ="FILEPATH" )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
