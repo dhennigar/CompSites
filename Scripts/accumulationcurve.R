@@ -1,35 +1,61 @@
-#This code will produce species accumulation curves for plots. I think in an ideal world we would plot the curve of (1) our given compensation site, and (2) the nearest two reference sites for our site reports. This wasn't done in 2016 but I think it would be a useful addition. 
+# Species accumulation curves for a given comp site and the two nearest reference sites.
 
-#To use the code,it should be as simple as changing the .csv filepath to wherever our files are.
-
-
-#Loading Libraries
 library("BiodiversityR")
 library("dplyr")
 library("tidyverse")
+library("ggplot2")
 
 
-#IMPORTING A .CSV
-SITEDATA <- read.csv("INSERT FILEPATH, IDEALLY A GITHUB FOLDER")
+### IMPORT DATA ###
+
+# Compensation Site
+Comp <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/09-006.csv", fileEncoding = "UTF-8-BOM")
 #ensuring data are numeric
-SITEDATA$PERCENT_COVER = as.numeric(SITEDATA$PERCENT_COVER)
-SITEDATA$PERCENT_COVER = SITEDATA$PERCENT_COVER*10
+Comp$PERCENT_COVER = as.numeric(Comp$PERCENT_COVER)
+# Comp$PERCENT_COVER = Comp$PERCENT_COVER*10 # unsure as to the purpose of this operation.
+Comp <- subset(Comp, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY)) # select native species only and remove extra columns
 
-#transforming dataset into wide format for richness calcs
-SITEDATAWIDE <- SITEDATA %>%
+# Reference Site 1
+Ref1 <- read.csv("FILEPATH", fileEncoding = "UTF-8-BOM")
+Ref1$PERCENT_COVER - as.numeric(Ref1$PERCENT_COVER)
+Ref1 <- subset(Ref1, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY))
+
+# Reference Site 2
+Ref2 <- read.csv("FILEPATH", fileEncoding = "UTF-8-BOM")
+Ref2$PERCENT_COVER - as.numeric(Ref2$PERCENT_COVER)
+Ref2 <- subset(Ref2, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY))
+
+
+### TRANSFROM DATA FROM LONG TO WIDE FORMAT ###
+
+CompWIDE <- Comp %>%
   spread(SPECIES_CODE, PERCENT_COVER)
-SITEDATAWIDE[is.na(SITEDATAWIDE)] <- 0
-SITEDATAWIDE = SITEDATAWIDE[-1]
+CompWIDE[is.na(CompWIDE)] <- 0
+CompWIDE = CompWIDE[-1]
 
-#species accumulation curve
-SITECURVE <- specaccum(SITEDATAWIDE)
+Ref1WIDE <- Ref1 %>%
+  spread(SPECIES_CODE, PERCENT_COVER)
+Ref1WIDE[is.na(RefWIDE)] <- 0
+Ref1WIDE = Ref1WIDE[-1]
 
-#plotting the curve
-PLOTSITECURVE <- plot(SITECURVE, ci.type="poly", col="tomato4", lwd=2, ci.lty=0, ci.col=rgb(1,0,0,0.4), 
+Ref2WIDE <- Ref2 %>%
+  spread(SPECIES_CODE, PERCENT_COVER)
+Ref2WIDE[is.na(RefWIDE)] <- 0
+Ref2WIDE = Ref2WIDE[-1]
+
+### CREATE SPECIES ACCUM CURVES
+CompAC <- specaccum(CompWIDE)
+Ref1AC <- specaccum(Ref1WIDE)
+Ref2AC <- specaccum(Ref2WIDE)
+
+
+### SINGLE CURVE PLOT
+accumCurve <- plot(CompRichness, ci.type="poly", col="tomato4", lwd=2, ci.lty=0, ci.col=rgb(1,0,0,0.4), 
               main = "", xlab="# of plots sampled", ylab= "# of native species", ylim =c(0,40))
 
+### PLOT FOR THREE CURVES
 
-
+ggplot()
 
 
 
