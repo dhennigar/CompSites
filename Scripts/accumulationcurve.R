@@ -1,19 +1,19 @@
 # Species accumulation curves for a given comp site and the two nearest reference sites.
 
+
+# import libraries
 library("BiodiversityR")
 library("dplyr")
 library("tidyverse")
-library("ggplot2")
 
 
 ### IMPORT DATA ###
+
 # edit file paths as necessary
 
 # Compensation Site
 Comp <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/09-006.csv", fileEncoding = "UTF-8-BOM")
-#ensuring data are numeric
 Comp$PERCENT_COVER = as.numeric(Comp$PERCENT_COVER)
-# Comp$PERCENT_COVER = Comp$PERCENT_COVER*10 # unsure as to the purpose of this operation.
 Comp <- subset(Comp, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY)) # select native species only and remove extra columns
 
 # Reference Site 1
@@ -44,13 +44,16 @@ Ref2WIDE <- Ref2 %>%
 Ref2WIDE[is.na(Ref2WIDE)] <- 0
 Ref2WIDE = Ref2WIDE[-1]
 
+
 ### CREATE SPECIES ACCUM CURVES
+
 CompRichness <- specaccum(CompWIDE)
 Ref1Richness <- specaccum(Ref1WIDE)
 Ref2Richness <- specaccum(Ref2WIDE)
 
 
 ### PLOT SAC's
+
 # plot comp site SAC
 plot(CompRichness, ci.type = "poly", col="tomato4", lwd = 2, ci.lty = 0, ci.col = rgb(1,0,0,0.4), 
         main = "", xlab = "# of plots sampled", ylab = "# of native species", ylim = c(0,40))
