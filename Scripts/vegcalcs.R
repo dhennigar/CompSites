@@ -2,7 +2,6 @@
 # 29/June/2021
 
 # libraries
-library(dplyr)
 library(tidyverse)
 library(BiodiversityR)
 
@@ -20,18 +19,15 @@ veg.wide <- subset(veg, select = c(-COMMENTS, -COMMUNITY, -Site_Number, -MAX_LH_
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove plot id column
 
-veg.nat.wide <- subset(veg, ORIGIN == "N", select = c(-COMMENTS, -COMMUNITY, # select natives only
-                                                      -Site_Number, -MAX_LH_CM, -ORIGIN))  %>%
-  spread(SPECIES_CODE, PERCENT_COVER) # long to wide format
-veg.nat.wide[is.na(veg.nat.wide)] <- 0 # empty cells are zero
-veg.nat.wide <- veg.nat.wide[-1] # remove plot id column
+# generate species lists
+## WIP ###
 
-veg.inv.wide <- subset(veg, ORIGIN == "I", select = c(-COMMENTS, -COMMUNITY, # select invasives only
-                                                      -Site_Number, -MAX_LH_CM, -ORIGIN)) %>%
-  spread(SPECIES_CODE, PERCENT_COVER) # long to wide format
-veg.inv.wide[is.na(veg.inv.wide)] <- 0 # empty cells are zero
-veg.inv.wide <- veg.inv.wide[-1] # remove plot id column
+# native and invasive subsets
+veg.wide.nat <- veg.wide %>% select(any_of(species.nat)) # select only native species
+veg.wide.inv <- veg.wide %>% select(any_of(species.inv)) # select only invasive species
+veg.wide.exo <- veg.wide %>% select(-any_of(species.nat)) # select any non-native species
 
+  
 # CALCULATIONS
 
 # mean height of tallest Carex lyngbyei per plot
@@ -48,8 +44,6 @@ shannon <- diversity(veg.nat.wide, index = "shannon")
 # simpson's diversity index (native)
 simpson <- diversity(veg.nat.wide, index = "simpson")
 
-# data summary for reporting relative abundance
-veg.summary <- as.data.frame(rowSums(veg.wide), row.names = "TOTAL")
-veg.summary$NATIVE <- rowSums(veg.nat.wide)
-veg.summary$INV <- rowSums(veg.inv.wide)
-
+# relative abundance
+natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
+invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
