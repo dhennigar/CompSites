@@ -18,9 +18,13 @@ veg.wide <- subset(veg, select = c(-COMMENTS, -COMMUNITY, -Site_Number, -MAX_LH_
   spread(SPECIES_CODE, PERCENT_COVER) # long to wide format
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove plot id column
+veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK")))
 
 # generate species lists
-## WIP ###
+species.nat <- subset(veg$SPECIES_CODE, veg$ORIGIN == "N") %>% # unique native species
+  unique()
+species.inv <- subset(veg$SPECIES_CODE, veg$ORIGIN == "I") %>% # unique invasive species
+  unique()
 
 # native and invasive subsets
 veg.wide.nat <- veg.wide %>% select(any_of(species.nat)) # select only native species
@@ -30,20 +34,34 @@ veg.wide.exo <- veg.wide %>% select(-any_of(species.nat)) # select any non-nativ
   
 # CALCULATIONS
 
-# mean height of tallest Carex lyngbyei per plot
+# mean height of tallest Carex lyngbyei
 lyngbyHeight <- mean(veg$MAX_LH_CM)
-lyngbyHeight
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
-richness.nat <- specnumber(veg.nat.wide)
+richness.nat <- specnumber(veg.wide.nat)
 
 # shannon-weiner diversity index (native)
-shannon <- diversity(veg.nat.wide, index = "shannon")
+shannon <- diversity(veg.wide.nat, index = "shannon")
 
 # simpson's diversity index (native)
-simpson <- diversity(veg.nat.wide, index = "simpson")
+simpson <- diversity(veg.wide.nat, index = "simpson")
 
 # relative abundance
 natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
 invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
+exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
+
+
+# RESULTS
+
+result <- data.frame(lyngbyHeight,
+                     mean(richness),
+                     mean(richness.nat),
+                     mean(simpson),
+                     mean(shannon),
+                     natives,
+                     exotics,
+                     invasives)
+
+write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006.csv")
