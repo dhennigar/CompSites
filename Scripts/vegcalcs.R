@@ -53,7 +53,7 @@ invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
 exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
 
 
-# RESULTS
+# RESULTS (modify filepath)
 
 result <- data.frame(lyngbyHeight,
                      mean(richness),
