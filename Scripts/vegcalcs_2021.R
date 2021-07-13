@@ -21,6 +21,8 @@ veg.wide <- veg.wide[-1] # remove plot id column
 veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK")))
 
 # generate species lists
+species <- unique(veg$SPECIES_CODE) # unique species list 
+
 species.nat <- subset(veg$SPECIES_CODE, veg$ORIGIN == "N") %>% # unique native species
   unique()
 species.inv <- subset(veg$SPECIES_CODE, veg$ORIGIN == "I") %>% # unique invasive species
@@ -64,4 +66,6 @@ result <- data.frame(lyngbyHeight,
                      exotics,
                      invasives)
 
-write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006.csv")
+write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006.csv") # veg analysis results
+write.csv(species, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006-species.csv") # complete species list
+write.csv(species.nat, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006-native-species.csv") # native species list
