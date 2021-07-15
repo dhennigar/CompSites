@@ -20,6 +20,7 @@ veg.wide <- subset(veg, select = c(-Comments, -COMMUNITY, -SITE.ID, -Max.LH..cm.
   spread(Common, X..Cover) # long to wide format
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove extra columns
+veg.wide <- veg.wide[-1]
 veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK",
                                           "Ground", "ground", "Ground ", "ground ",
                                           "log", "log ", "Log", "Log "))) # exclude non-veg entries
@@ -70,4 +71,4 @@ result <- data.frame(lyngbyeHeight,
                      exotics,
                      invasives)
 
-write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/2015/REF-03-001.csv") # veg analysis results
+write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/2015/REF-02-001.csv") # veg analysis results
