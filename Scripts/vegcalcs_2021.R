@@ -67,5 +67,4 @@ result <- data.frame(lyngbyHeight,
                      invasives)
 
 write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006.csv") # veg analysis results
-write.csv(species, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006-species.csv") # complete species list
-write.csv(species.nat, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006-native-species.csv") # native species list
+
