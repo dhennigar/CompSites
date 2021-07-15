@@ -2,7 +2,7 @@
 #Loading Libraries
 library("dplyr")
 library("tidyverse")
-library("BiodiversityR")boop
+library("BiodiversityR")
 
 
 #CREATION OF FRENCHIES DATASET
