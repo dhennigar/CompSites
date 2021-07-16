@@ -72,3 +72,4 @@ result <- data.frame(lyngbyeHeight,
                      invasives)
 
 write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/2015/REF-02-001.csv") # veg analysis results
+write.csv(species, "C://Users/Owner/OneDrive/Documents/GitHub/Compsites/Results/2015/REF-02-001.csv") # unique species list

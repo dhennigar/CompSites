@@ -66,5 +66,5 @@ result <- data.frame(lyngbyHeight,
                      exotics,
                      invasives)
 
-write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/09-006.csv") # veg analysis results
-
+write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/2021/09-006.csv") # veg analysis results
+write.csv(species, "C://Users/Owner/OneDrive/Documents/GitHub/Compsites/Results/2021/09-006-species.csv") # unique species lists
