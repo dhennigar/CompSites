@@ -8,7 +8,7 @@ library(BiodiversityR)
 # DATA IMPORT & PREP
 
 # import (modify filepath)
-veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/09-006.csv",
+veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/Glenrose_Upstream.csv",
                 fileEncoding = "UTF-8-BOM")
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
@@ -66,5 +66,6 @@ result <- data.frame(lyngbyHeight,
                      exotics,
                      invasives)
 
-write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/2021/09-006.csv") # veg analysis results
-write.csv(species, "C://Users/Owner/OneDrive/Documents/GitHub/Compsites/Results/2021/09-006-species.csv") # unique species lists
+write.csv(result, "C://Users/User/Desktop/Github/CompSites/Results/2021/Glenrose_upstream-results.csv") # veg analysis results
+
+write.csv(species, "C://Users/User/Desktop/Github/CompSites/Results/2021/Glenrose_upstream-species.csv") # unique species lists
