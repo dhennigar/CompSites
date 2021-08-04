@@ -8,17 +8,17 @@ library(BiodiversityR)
 # DATA IMPORT & PREP
 
 # import (modify filepath)
-veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/Glenrose_Upstream.csv",
+veg <- read.csv("C://Users/Owner/OneDrive/Documents/Github/CompSites/FieldData/2021/Glenrose_Upstream.csv",
                 fileEncoding = "UTF-8-BOM")
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
+veg <- subset(veg, SPECIES_CODE!="WOOD" & SPECIES_CODE!="MUD" & SPECIES_CODE!="LITTER" & SPECIES_CODE!="ROCK") # remove non-veg
 
 # transform data for richness calculations
 veg.wide <- subset(veg, select = c(-COMMENTS, -COMMUNITY, -Site_Number, -MAX_LH_CM, -ORIGIN)) %>%
   spread(SPECIES_CODE, PERCENT_COVER) # long to wide format
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove plot id column
-veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK")))
 
 # generate species lists
 species <- unique(veg$SPECIES_CODE) # unique species list 
