@@ -26,8 +26,8 @@ veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK",
                                           "log", "log ", "Log", "Log "))) # exclude non-veg entries
 
 # generate species lists
-species <- unique(veg$Common) # unique species list 
-
+species <- subset(veg$Common, veg$N.E.I.T.U == "N" | veg$N.E.I.T.U == "E" | veg$N.E.I.T.U == "I") %>% # unique species list
+  unique() 
 species.nat <- subset(veg$Common, veg$N.E.I.T.U == "N") %>% # unique native species
   unique()
 species.inv <- subset(veg$Common, veg$N.E.I.T.U == "I") %>% # unique invasive species

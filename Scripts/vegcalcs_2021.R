@@ -21,8 +21,8 @@ veg.wide <- veg.wide[-1] # remove plot id column
 veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK")))
 
 # generate species lists
-species <- unique(veg$SPECIES_CODE) # unique species list 
-
+species <- subset(veg$SPECIES_CODE, veg$ORIGIN == "N" | veg$ORIGIN == "E" | veg$ORIGIN == "I") %>% # unique species list
+  unique()  
 species.nat <- subset(veg$SPECIES_CODE, veg$ORIGIN == "N") %>% # unique native species
   unique()
 species.inv <- subset(veg$SPECIES_CODE, veg$ORIGIN == "I") %>% # unique invasive species
