@@ -37,7 +37,7 @@ veg.wide.exo <- veg.wide %>% select(-any_of(species.nat)) # select any non-nativ
 # CALCULATIONS
 
 # mean height of tallest Carex lyngbyei
-lyngbyHeight <- mean(veg$MAX_LH_CM)
+lyngbyHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
