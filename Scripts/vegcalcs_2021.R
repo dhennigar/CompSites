@@ -7,9 +7,11 @@ library(BiodiversityR)
 
 # DATA IMPORT & PREP
 
-# import (modify filepath)
-veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/09-006.csv",
-                fileEncoding = "UTF-8-BOM")
+# import (select your file path by uncommenting the correct line)
+veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/09-006.csv", fileEncoding = "UTF-8-BOM") # Robyn
+# veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/", fileEncoding="UTF-8-BOM") # Daniel
+
+
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
 veg <- subset(veg, SPECIES_CODE != "MUD" & SPECIES_CODE != "WOOD" & SPECIES_CODE != "ROCK" & SPECIES_CODE != "LITTER" & SPECIES_CODE != "LOG")

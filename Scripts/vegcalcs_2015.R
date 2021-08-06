@@ -7,10 +7,12 @@ library(BiodiversityR)
 
 # DATA IMPORT & PREP
 
-# import (modify filepath) 
+# import (select your file path by uncommenting the correct line) 
 # Note that 2015 spreadsheets must have rows 1 and 3 removed prior to import.
-veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2015/REF-02-001.csv",
-                fileEncoding = "UTF-8-BOM")
+veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2015/REF-02-001.csv", fileEncoding = "UTF-8-BOM")# Daniel
+# veg <- read.csv("INSERT ROBYN's FILE PATH", fileEncoding="UTF-8-BOM") # Robyn
+
+# Prep the data
 veg$X..COVER <- as.numeric(veg$X..Cover) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1 | is.na(COMMUNITY)) # select only community 1. Include "NA" for single community sites.
 
