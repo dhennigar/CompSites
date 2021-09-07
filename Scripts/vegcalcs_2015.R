@@ -35,13 +35,19 @@ species.nat <- subset(veg$Common, veg$N.E.I.T.U == "N") %>% # unique native spec
   unique()
 species.inv <- subset(veg$Common, veg$N.E.I.T.U == "I") %>% # unique invasive species
   unique()
+species.exo <- subset(veg$Common, veg$N.E.I.T.U == "E") %>% # unique invasive species
+  unique()
+species.unk <- subset(veg$Common, veg$N.E.I.T.U == "U") %>% # unique invasive species
+  unique()
+
 
 # native and invasive subsets
 veg.wide.nat <- veg.wide %>% select(any_of(species.nat)) # select only native species
 veg.wide.inv <- veg.wide %>% select(any_of(species.inv)) # select only invasive species
-veg.wide.exo <- veg.wide %>% select(-any_of(species.nat)) # select any non-native species
+veg.wide.exo <- veg.wide %>% select(any_of(species.exo)) # select any non-native species
+veg.wide.unk <- veg.wide %>% select(any_of(species.unk)) # select any non-native species
 
-  
+
 # CALCULATIONS
 
 # mean height of tallest Carex lyngbyei
@@ -61,7 +67,7 @@ simpson <- diversity(veg.wide.nat, index = "simpson")
 natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
 invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
 exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
-
+unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.Wide))
 
 # RESULTS (modify filepath)
 
@@ -72,7 +78,8 @@ result <- data.frame(lyngbyeHeight,
                      mean(shannon),
                      natives,
                      exotics,
-                     invasives)
+                     invasives,
+                     unknowns)
 
-write.csv(result, "C://Users/Owner/OneDrive/Documents/GitHub/CompSites/Results/2015/REF-02-001.csv") # veg analysis results
-write.csv(species, "C://Users/Owner/OneDrive/Documents/GitHub/Compsites/Results/2015/REF-02-001.csv") # unique species list
+write.csv(result, "./Results/2015/REF-02-001.csv") # veg analysis results
+write.csv(species, "./Results/2015/REF-02-001.csv") # unique species list

@@ -11,7 +11,7 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2021/03-001.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2021/Ref9.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
 
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
@@ -31,12 +31,16 @@ species.nat <- subset(veg$SPECIES_CODE, veg$ORIGIN == "N") %>% # unique native s
   unique()
 species.inv <- subset(veg$SPECIES_CODE, veg$ORIGIN == "I") %>% # unique invasive species
   unique()
+species.exo <- subset(veg$SPECIES_CODE, veg$ORIGIN == "E") %>% # unique exotic species
+  unique()
+species.unk <- subset(veg$SPECIES_CODE, veg$ORIGIN == "U") %>% # unique exotic species
+  unique()
 
 # native and invasive subsets
 veg.wide.nat <- veg.wide %>% select(any_of(species.nat)) # select only native species
 veg.wide.inv <- veg.wide %>% select(any_of(species.inv)) # select only invasive species
-veg.wide.exo <- veg.wide %>% select(-any_of(species.nat)) # select any non-native species
-
+veg.wide.exo <- veg.wide %>% select(any_of(species.exo)) # select any non-native species
+veg.wide.unk <- veg.wide %>% select(any_of(species.unk)) # select any non-native species
   
 # CALCULATIONS
 
@@ -57,7 +61,7 @@ simpson <- diversity(veg.wide.nat, index = "simpson")
 natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
 invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
 exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
-
+unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.wide))
 
 # RESULTS (modify filepath)
 
@@ -68,8 +72,9 @@ result <- data.frame(lyngbyHeight,
                      mean(shannon),
                      natives,
                      exotics,
-                     invasives)
+                     invasives,
+                     unknowns)
 
-write.csv(result, "./Results/2021/03-001-results.csv") # veg analysis results
+write.csv(result, "./Results/2021/Ref9-results.csv") # veg analysis results
 
-write.csv(species, "./Results/2021/03-001-species.csv") # unique species lists
+write.csv(species, "./Results/2021/Ref9-species.csv") # unique species lists
