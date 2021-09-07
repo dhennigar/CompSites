@@ -11,19 +11,19 @@ library("tidyverse")
 # edit file paths as necessary
 
 # Compensation Site
-Comp <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/09-003.csv", fileEncoding = "UTF-8-BOM")
+Comp <- read.csv("./FieldData/2021/09-003.csv", fileEncoding = "UTF-8-BOM")
 Comp$PERCENT_COVER = as.numeric(Comp$PERCENT_COVER)
 Comp <- subset(Comp, COMMUNITY == 1)
 Comp <- subset(Comp, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY)) # select native species only and remove extra columns
 
 # Reference Site 1
-Ref1 <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/Ref11.csv", fileEncoding = "UTF-8-BOM")
+Ref1 <- read.csv("./FieldData/2021/Ref11.csv", fileEncoding = "UTF-8-BOM")
 Ref1$PERCENT_COVER <- as.numeric(Ref1$PERCENT_COVER)
 Ref1 <- subset(Ref1, COMMUNITY == 1)
 Ref1 <- subset(Ref1, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY))
 
 # Reference Site 2
-Ref2 <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/Ref13.csv", fileEncoding = "UTF-8-BOM")
+Ref2 <- read.csv("./FieldData/2021/Ref13.csv", fileEncoding = "UTF-8-BOM")
 Ref2$PERCENT_COVER <- as.numeric(Ref2$PERCENT_COVER)
 Ref2 <- subset(Ref2, COMMUNITY == 1)
 Ref2 <- subset(Ref2, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY))
