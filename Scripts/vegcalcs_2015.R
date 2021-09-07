@@ -9,8 +9,9 @@ library(BiodiversityR)
 
 # import (select your file path by uncommenting the correct line) 
 # Note that 2015 spreadsheets must have rows 1 and 3 removed prior to import.
-veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2015/REF-02-001.csv", fileEncoding = "UTF-8-BOM")# Daniel
+veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2015/REF-02-001.csv", fileEncoding = "UTF-8-BOM")# D Hennigar
 # veg <- read.csv("INSERT ROBYN's FILE PATH", fileEncoding="UTF-8-BOM") # Robyn
+# veg <- read.csv("INSERT DS's FILE PATH", fileEncoding="UTF-8-BOM") # D Stewart
 
 # Prep the data
 veg$X..COVER <- as.numeric(veg$X..Cover) # ensure numeric cover data

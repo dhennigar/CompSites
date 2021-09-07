@@ -9,8 +9,8 @@ library(BiodiversityR)
 
 # import (select your file path by uncommenting the correct line)
 #veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/09-006.csv", fileEncoding = "UTF-8-BOM") # Robyn
-veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/09-006.csv", fileEncoding="UTF-8-BOM") # Daniel
-
+veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/09-006.csv", fileEncoding="UTF-8-BOM") # D Hennigar
+# <- read.csv("DS's FILE PATH") # D Stewart
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
@@ -42,7 +42,7 @@ veg.wide.exo <- veg.wide %>% select(-any_of(species.nat)) # select any non-nativ
 lyngbyHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
 
 # richness (native and total)
-richness <- (specnumber(veg.wide))
+richness <- specnumber(veg.wide)
 richness.nat <- specnumber(veg.wide.nat)
 
 # shannon-weiner diversity index (native)
