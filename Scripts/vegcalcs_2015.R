@@ -7,11 +7,11 @@ library(BiodiversityR)
 
 # DATA IMPORT & PREP
 
-# import (select your file path by uncommenting the correct line) 
-# Note that 2015 spreadsheets must have rows 1 and 3 removed prior to import.
-veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2015/REF-02-001.csv", fileEncoding = "UTF-8-BOM")# D Hennigar
-# veg <- read.csv("INSERT ROBYN's FILE PATH", fileEncoding="UTF-8-BOM") # Robyn
-# veg <- read.csv("INSERT DS's FILE PATH", fileEncoding="UTF-8-BOM") # D Stewart
+# Path relative to working directory. Run getwd() to see your current working directory. It should print your path to "CompSites".
+# If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
+# Note that "." here represents the current working directory.
+
+veg <- read.csv("./FieldData/2015/REF-02-001.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
 
 # Prep the data
 veg$X..COVER <- as.numeric(veg$X..Cover) # ensure numeric cover data
@@ -24,7 +24,7 @@ veg.wide <- subset(veg, select = c(-Comments, -COMMUNITY, -SITE.ID, -Max.LH..cm.
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove extra columns
 veg.wide <- veg.wide[-1]
-veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK",
+veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK", "ALGAE",
                                           "Ground", "ground", "Ground ", "ground ",
                                           "log", "log ", "Log", "Log "))) # exclude non-veg entries
 
