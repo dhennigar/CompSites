@@ -8,13 +8,13 @@ library(BiodiversityR)
 # DATA IMPORT & PREP
 
 # import (select your file path by uncommenting the correct line)
-#veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/09-006.csv", fileEncoding = "UTF-8-BOM") # Robyn
-veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/09-006.csv", fileEncoding="UTF-8-BOM") # D Hennigar
+#veg <- read.csv("C://Users/User/Desktop/Github/CompSites/FieldData/2021/Ref11.csv", fileEncoding = "UTF-8-BOM") # Robyn
+veg <- read.csv("C://Users/Owner/OneDrive/Documents/GitHub/CompSites/FieldData/2021/05-002.csv", fileEncoding="UTF-8-BOM") # D Hennigar
 # <- read.csv("DS's FILE PATH") # D Stewart
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
-veg <- subset(veg, SPECIES_CODE != "MUD" & SPECIES_CODE != "WOOD" & SPECIES_CODE != "ROCK" & SPECIES_CODE != "LITTER" & SPECIES_CODE != "LOG")
+veg <- subset(veg, SPECIES_CODE != "ALGAE" & SPECIES_CODE != "MUD" & SPECIES_CODE != "WOOD" & SPECIES_CODE != "ROCK" & SPECIES_CODE != "LITTER" & SPECIES_CODE != "LOG")
 
 # transform data for richness calculations
 veg.wide <- subset(veg, select = c(-COMMENTS, -COMMUNITY, -Site_Number, -MAX_LH_CM, -ORIGIN)) %>%
@@ -68,6 +68,6 @@ result <- data.frame(lyngbyHeight,
                      exotics,
                      invasives)
 
-write.csv(result, "C://Users/User/Desktop/Github/CompSites/Results/2021/09-006-results.csv") # veg analysis results
+write.csv(result, "C://Users/Owner/OneDrive/Documents/Github/CompSites/Results/2021/05-002-results.csv") # veg analysis results
 
-write.csv(species, "C://Users/User/Desktop/Github/CompSites/Results/2021/09-006-species.csv") # unique species lists
+write.csv(species, "C://Users/Owner/OneDrive/Documents/Github/CompSites/Results/2021/05-002-species.csv") # unique species lists
