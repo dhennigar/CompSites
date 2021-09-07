@@ -58,7 +58,7 @@ Ref2Richness <- specaccum(Ref2WIDE)
 
 # plot comp site SAC
 plot(CompRichness, ci.type = "poly", lwd = 2, ci.lty = 0, ci.col = rgb(1,0,0,0.1), col = "red", 
-        main = "09-003 SAC", xlab = "Sampling effort", ylab = "Native species richness", ylim = c(0,40))
+     xlab = "# of plots sampled", ylab = "native species richness", ylim = c(0,40))
 
 # plot reference site SAC
 lines(Ref1Richness, ci.type = "poly", ci.col = rgb(0.3,1,0.3,0.1), col = rgb(0,0.7,0), lwd = 2, ci.lty = 0, lty = 2)
@@ -68,6 +68,7 @@ lines(Ref2Richness, ci.type = "poly", ci.col = rgb(0.3,0.3,1,0.1), col = "blue",
 legend(1, 38, legend = c("09-003", "REF-11", "REF-13"),
        col = c("red", rgb(0,0.7,0), "blue"),
        lty = c(1,2,2))
+
 
 
 
