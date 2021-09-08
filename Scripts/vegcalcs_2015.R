@@ -11,7 +11,7 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2015/REF-02-001.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2015/Ref20.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
 
 # Prep the data
 veg$X..COVER <- as.numeric(veg$X..Cover) # ensure numeric cover data
@@ -35,9 +35,9 @@ species.nat <- subset(veg$Common, veg$N.E.I.T.U == "N") %>% # unique native spec
   unique()
 species.inv <- subset(veg$Common, veg$N.E.I.T.U == "I") %>% # unique invasive species
   unique()
-species.exo <- subset(veg$Common, veg$N.E.I.T.U == "E") %>% # unique invasive species
+species.exo <- subset(veg$Common, veg$N.E.I.T.U == "E") %>% # unique exotic species
   unique()
-species.unk <- subset(veg$Common, veg$N.E.I.T.U == "U") %>% # unique invasive species
+species.unk <- subset(veg$Common, veg$N.E.I.T.U == "U") %>% # unique unknown species
   unique()
 
 
@@ -81,5 +81,5 @@ result <- data.frame(lyngbyeHeight,
                      invasives,
                      unknowns)
 
-write.csv(result, "./Results/2015/REF-02-001.csv") # veg analysis results
-write.csv(species, "./Results/2015/REF-02-001.csv") # unique species list
+write.csv(result, "./Results/2015/Ref20.csv") # veg analysis results
+write.csv(species, "./Results/2015/Ref20.csv") # unique species list
