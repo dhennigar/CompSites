@@ -16,7 +16,7 @@ veg <- read.csv("./FieldData/2021/Ref17.csv", fileEncoding="UTF-8-BOM") # Modify
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
-veg <- subset(veg, SPECIES_CODE != "ALGAE" & SPECIES_CODE != "MUD" & SPECIES_CODE != "WOOD" & SPECIES_CODE != "ROCK" & SPECIES_CODE != "LITTER" & SPECIES_CODE != "LOG")
+veg <- subset(veg, SPECIES_CODE != "SAND" & SPECIES_CODE != "ALGAE" & SPECIES_CODE != "MUD" & SPECIES_CODE != "WOOD" & SPECIES_CODE != "ROCK" & SPECIES_CODE != "LITTER" & SPECIES_CODE != "LOG")
 
 # transform data for richness calculations
 veg.wide <- subset(veg, select = c(-COMMENTS, -COMMUNITY, -Site_Number, -MAX_LH_CM, -ORIGIN)) %>%
@@ -78,3 +78,9 @@ result <- data.frame(lyngbyHeight,
 write.csv(result, "./Results/2021/Ref17-results.csv") # veg analysis results
 
 write.csv(species, "./Results/2021/Ref17-species.csv") # unique species list
+
+#
+#
+#
+
+
