@@ -4,7 +4,7 @@
 
 library(tidyverse)
 
-# IMPORT
+# IMPORT AND CALCULATIONS
 
 setwd("./FieldData/2021")
 files <- list.files(pattern = ".csv")
@@ -38,8 +38,10 @@ for(i in 1:length(files)){
 }
 
 
+# RESULTS
+
 result <- data.frame(SITE_ID = files,
-                     DEBRIS = debris)
+                     DEBRIS = debris/100)
 
 setwd("~/GitHub/CompSites")
 write.csv(result, "./Results/2021/LogCover.csv")
