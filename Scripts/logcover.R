@@ -45,6 +45,5 @@ result <- data.frame(SITE_ID = files,
 
 setwd("~/GitHub/CompSites")
 write.csv(result, "./Results/2021/LogCover.csv")
-#
-#
-#
+
+
