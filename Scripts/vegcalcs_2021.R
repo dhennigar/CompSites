@@ -87,7 +87,7 @@ write.csv(result, "./Results/2021/14-001-results.csv") # veg analysis results
 
 write.csv(species, "./Results/2021/14-001-species.csv") # unique species list
 
-write.csv(PC_result, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-percentcover.csv")
+write.csv(PC_result, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-percentcover.csv") # summary of percent cover for each species
 #
 #
 #
