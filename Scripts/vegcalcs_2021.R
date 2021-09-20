@@ -4,19 +4,20 @@
 # libraries
 library(tidyverse)
 library(BiodiversityR)
-
+library(mosaic)
 # DATA IMPORT & PREP
 
 # Path relative to working directory. Run getwd() to see your current working directory. It should print your path to "CompSites".
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2021/14-001.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("C:/Users/User/Desktop/Github/CompSites/FieldData/2021/02-011.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
 
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1) # select only community 1
 veg <- subset(veg, SPECIES_CODE != "SAND" & SPECIES_CODE != "ALGAE" & SPECIES_CODE != "MUD" & SPECIES_CODE != "WOOD" & SPECIES_CODE != "ROCK" & SPECIES_CODE != "LITTER" & SPECIES_CODE != "LOG")
+
 
 # transform data for richness calculations
 veg.wide <- subset(veg, select = c(-COMMENTS, -COMMUNITY, -Site_Number, -MAX_LH_CM, -ORIGIN)) %>%
@@ -43,6 +44,11 @@ veg.wide.exo <- veg.wide %>% select(any_of(species.exo)) # select any non-native
 veg.wide.unk <- veg.wide %>% select(any_of(species.unk)) # select any non-native species
   
 # CALCULATIONS
+
+#Percent cover summary
+PC_mean <- sapply(veg.wide, mean, na.rm=TRUE)
+PC_sd <- sapply(veg.wide, sd, na.rm=TRUE)
+data.frame(PC_mean, PC_sd)
 
 # mean height of tallest Carex lyngbyei
 lyngbyHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
@@ -75,10 +81,13 @@ result <- data.frame(lyngbyHeight,
                      invasives,
                      unknowns)
 
+PC_result <- data.frame (PC_mean, PC_sd)
+
 write.csv(result, "./Results/2021/14-001-results.csv") # veg analysis results
 
 write.csv(species, "./Results/2021/14-001-species.csv") # unique species list
 
+write.csv(PC_result, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-percentcover.csv")
 #
 #
 #
