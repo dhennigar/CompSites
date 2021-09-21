@@ -4,7 +4,7 @@
 # libraries
 library(tidyverse)
 library(BiodiversityR)
-library(mosaic)
+
 # DATA IMPORT & PREP
 
 # Path relative to working directory. Run getwd() to see your current working directory. It should print your path to "CompSites".
@@ -52,6 +52,7 @@ data.frame(PC_mean, PC_sd)
 
 # mean height of tallest Carex lyngbyei
 lyngbyHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
+lyngbysd <- sd(veg$MAX_LH_CM, na.rm=TRUE)
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
@@ -65,27 +66,34 @@ simpson <- diversity(veg.wide.nat, index = "simpson")
 
 # relative abundance
 natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
+nativesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
 invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
+invasivesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
 exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
 unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.wide))
+
+
 
 # RESULTS (modify filepath)
 
 result <- data.frame(lyngbyHeight,
+                     lyngbysd,
                      mean(richness),
                      mean(richness.nat),
                      mean(simpson),
                      mean(shannon),
                      natives,
+                     nativesd,
                      exotics,
                      invasives,
+                     invasivesd,
                      unknowns)
 
 PC_result <- data.frame (PC_mean, PC_sd)
 
-write.csv(result, "./Results/2021/14-001-results.csv") # veg analysis results
+write.csv(result, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-results.csv") # veg analysis results
 
-write.csv(species, "./Results/2021/14-001-species.csv") # unique species list
+write.csv(species, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-species.csv") # unique species list
 
 write.csv(PC_result, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-percentcover.csv") # summary of percent cover for each species
 #
