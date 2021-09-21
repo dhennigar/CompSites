@@ -1,2 +1,2 @@
-"","lyngbyHeight","mean.richness.","mean.richness.nat.","mean.simpson.","mean.shannon.","natives","exotics","invasives","unknowns"
-"1",NA,3,3,0.0327092770652016,0.0876970711728577,1,0,0,0
+"","lyngbyHeight","lyngbysd","mean.richness.","mean.richness.nat.","mean.simpson.","mean.shannon.","natives","nativesd","exotics","invasives","invasivesd","unknowns"
+"1",NA,NA,3,3,0.0327092770652016,0.0876970711728577,1,0,0,0,0,0
