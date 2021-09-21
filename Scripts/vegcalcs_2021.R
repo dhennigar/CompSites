@@ -70,7 +70,9 @@ nativesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
 invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
 invasivesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
 exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
+exoticsd <- sd(rowSums(veg.wide.exo)/rowSums(veg.wide))
 unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.wide))
+unknownsd <- sd(rowSums(veg.wide.unk)/rowSums(veg.wide))
 
 
 
@@ -85,11 +87,13 @@ result <- data.frame(lyngbyHeight,
                      natives,
                      nativesd,
                      exotics,
+                     exoticsd,
                      invasives,
                      invasivesd,
-                     unknowns)
+                     unknowns,
+                     unknownsd)
 
-PC_result <- data.frame (PC_mean, PC_sd)
+PC_result <- data.frame(PC_mean, PC_sd)
 
 write.csv(result, "./Results/2021/02-013-results.csv") # veg analysis results
 
