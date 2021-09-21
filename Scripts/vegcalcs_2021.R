@@ -11,7 +11,7 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2021/02-012.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2021/02-013.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
 
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
@@ -91,11 +91,11 @@ result <- data.frame(lyngbyHeight,
 
 PC_result <- data.frame (PC_mean, PC_sd)
 
-write.csv(result, "./Results/2021/02-012-results.csv") # veg analysis results
+write.csv(result, "./Results/2021/02-013-results.csv") # veg analysis results
 
-write.csv(species, "./Results/2021/02-012-species.csv") # unique species list
+write.csv(species, "./Results/2021/02-013-species.csv") # unique species list
 
-write.csv(PC_result, "./Results/2021/02-012-percentcover.csv") # summary of percent cover for each species
+write.csv(PC_result, "./Results/2021/02-013-percentcover.csv") # summary of percent cover for each species
 #
 #
 #

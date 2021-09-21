@@ -50,8 +50,14 @@ veg.wide.unk <- veg.wide %>% select(any_of(species.unk)) # select any non-native
 
 # CALCULATIONS
 
+#Percent cover summary
+PC_mean <- sapply(veg.wide, mean, na.rm=TRUE)
+PC_sd <- sapply(veg.wide, sd, na.rm=TRUE)
+data.frame(PC_mean, PC_sd)
+
 # mean height of tallest Carex lyngbyei
 lyngbyeHeight <- mean(veg$Max.LH..cm.)
+lyngbysd <- sd(veg$MAX_LH_CM, na.rm=TRUE)
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
@@ -71,15 +77,19 @@ unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.Wide))
 
 # RESULTS (modify filepath)
 
-result <- data.frame(lyngbyeHeight,
+result <- data.frame(lyngbyHeight,
+                     lyngbysd,
                      mean(richness),
                      mean(richness.nat),
                      mean(simpson),
                      mean(shannon),
                      natives,
+                     nativesd,
                      exotics,
                      invasives,
+                     invasivesd,
                      unknowns)
 
 write.csv(result, "./Results/2015/Ref20.csv") # veg analysis results
 write.csv(species, "./Results/2015/Ref20.csv") # unique species list
+write.csv(PC_result, "./Results/2021/02-013-percentcover.csv") # summary of percent cover for each species
