@@ -11,7 +11,7 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2015/csv/02-005-B.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2015/csv/02-007-B.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
 veg <- select(veg, 1:8) # workaround for some import issues of 2015 data
 
 
@@ -25,7 +25,7 @@ veg.wide <- subset(veg, select = c(-COMMUNITY, -SITE_ID, -MAX_LH, -ORIGIN, -Scie
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove extra columns
 veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK", "ALGAE",
-                                          "mud", "mud ", "wood", "wood", "litter", "litter ",
+                                          "mud", "mud ", "wood", "wood ", "litter", "litter ",
                                           "Ground", "ground", "Ground ", "ground ", "bare ground",
                                           "rock", "rock ", "rocks", "gravel", "sand", "sand ",
                                           "log", "log ", "Log", "Log ",
@@ -73,14 +73,26 @@ shannon <- diversity(veg.wide.nat, index = "shannon")
 simpson <- diversity(veg.wide.nat, index = "simpson")
 
 # relative abundance
-natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
-nativesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
-invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
-invasivesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
-exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
-exoticsd <- sd(rowSums(veg.wide.exo)/rowSums(veg.wide))
-unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.wide))
-unknownsd <- sd(rowSums(veg.wide.unk)/rowSums(veg.wide))
+rel_ab <- function(origin, total) {
+  return(mean(rowSums(origin)/rowSums(total)))
+}
+
+rel_ab_sd <- function(origin, total) {
+  return(sd(rowSums(origin)/rowSums(total)))
+}
+
+natives <- rel_ab(veg.wide.nat, veg.wide)
+nativesd <- rel_ab_sd(veg.wide.nat, veg.wide)
+
+invasives <- rel_ab(veg.wide.inv, veg.wide)
+invasivesd <- rel_ab_sd(veg.wide.inv, veg.wide)
+
+exotics <- rel_ab(veg.wide.exo, veg.wide)
+exoticsd <- rel_ab_sd(veg.wide.exo, veg.wide)
+
+unknowns <- rel_ab(veg.wide.unk, veg.wide)
+unknownsd <- rel_ab_sd(veg.wide.unk, veg.wide)
+
 
 # RESULTS (modify filepath)
 
@@ -89,7 +101,9 @@ result <- data.frame(lyngbyeHeight,
                      mean(richness),
                      mean(richness.nat),
                      mean(simpson),
+                     sd(simpson),
                      mean(shannon),
+                     sd(shannon),
                      natives,
                      nativesd,
                      exotics,
@@ -101,6 +115,6 @@ result <- data.frame(lyngbyeHeight,
 
 PC_result <- data.frame(PC_mean, PC_sd)
 
-write.csv(result, "./Results/2015/02-005-B-results.csv") # veg analysis results
-write.csv(species, "./Results/2015/02-005-B-species.csv") # unique species list
-write.csv(PC_result, "./Results/2015/02-005-B-percentcover.csv") # summary of percent cover for each species
+write.csv(result, "./Results/2015/02-007-B-results.csv") # veg analysis results
+write.csv(species, "./Results/2015/02-007-B-species.csv") # unique species list
+write.csv(PC_result, "./Results/2015/02-007-B-percentcover.csv") # summary of percent cover for each species
