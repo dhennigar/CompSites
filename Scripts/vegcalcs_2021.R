@@ -51,8 +51,8 @@ PC_sd <- sapply(veg.wide, sd, na.rm=TRUE)
 data.frame(PC_mean, PC_sd)
 
 # mean height of tallest Carex lyngbyei
-lyngbyHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
-lyngbysd <- sd(veg$MAX_LH_CM, na.rm=TRUE)
+lyngbyeHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
+lyngbyesd <- sd(veg$MAX_LH_CM, na.rm=TRUE)
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
@@ -90,8 +90,8 @@ unknownsd <- rel_ab_sd(veg.wide.unk, veg.wide)
 
 # RESULTS (modify filepath)
 
-result <- data.frame(lyngbyHeight,
-                     lyngbysd,
+result <- data.frame(lyngbyeHeight,
+                     lyngbyesd,
                      mean(richness),
                      mean(richness.nat),
                      mean(simpson),
