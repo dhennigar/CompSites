@@ -11,7 +11,9 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2015/csv/REF-12-2015.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2015/csv/02-005-B.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- select(veg, 1:8) # workaround for some import issues of 2015 data
+
 
 # Prep the data
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
@@ -26,7 +28,9 @@ veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK", "ALGA
                                           "mud", "mud ", "wood", "wood", "litter", "litter ",
                                           "Ground", "ground", "Ground ", "ground ", "bare ground",
                                           "rock", "rock ", "rocks", "gravel", "sand", "sand ",
-                                          "log", "log ", "Log", "Log "))) # exclude non-veg entries
+                                          "log", "log ", "Log", "Log ",
+                                          "Bare ground at stems", "Bare ground from above",
+                                          "bare ground at stems", "bare ground from above"))) # exclude non-veg entries
 
 # generate species lists
 species <- subset(veg$Common, veg$ORIGIN == "N" | veg$ORIGIN == "E" | veg$ORIGIN == "I" | veg$ORIGIN == "U") %>% # unique species list
@@ -97,6 +101,6 @@ result <- data.frame(lyngbyeHeight,
 
 PC_result <- data.frame(PC_mean, PC_sd)
 
-write.csv(result, "./Results/2015/REF-12-2015-results.csv") # veg analysis results
-write.csv(species, "./Results/2015/REF-12-2015-species.csv") # unique species list
-write.csv(PC_result, "./Results/2015/REF-12-2015-percentcover.csv") # summary of percent cover for each species
+write.csv(result, "./Results/2015/02-005-B-results.csv") # veg analysis results
+write.csv(species, "./Results/2015/02-005-B-species.csv") # unique species list
+write.csv(PC_result, "./Results/2015/02-005-B-percentcover.csv") # summary of percent cover for each species

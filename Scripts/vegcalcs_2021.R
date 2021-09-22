@@ -64,15 +64,27 @@ shannon <- diversity(veg.wide.nat, index = "shannon")
 # simpson's diversity index (native)
 simpson <- diversity(veg.wide.nat, index = "simpson")
 
+
 # relative abundance
-natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
-nativesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
-invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
-invasivesd <- sd(rowSums(veg.wide.nat)/rowSums(veg.wide))
-exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
-exoticsd <- sd(rowSums(veg.wide.exo)/rowSums(veg.wide))
-unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.wide))
-unknownsd <- sd(rowSums(veg.wide.unk)/rowSums(veg.wide))
+rel_ab <- function(origin, total) {
+  return(mean(rowSums(origin)/rowSums(total)))
+}
+
+rel_ab_sd <- function(origin, total) {
+  return(sd(rowSums(origin)/rowSums(total)))
+}
+
+natives <- rel_ab(veg.wide.nat, veg.wide)
+nativesd <- rel_ab_sd(veg.wide.nat, veg.wide)
+
+invasives <- rel_ab(veg.wide.inv, veg.wide)
+invasivesd <- rel_ab_sd(veg.wide.inv, veg.wide)
+
+exotics <- rel_ab(veg.wide.exo, veg.wide)
+exoticsd <- rel_ab_sd(veg.wide.exo, veg.wide)
+
+unknowns <- rel_ab(veg.wide.unk, veg.wide)
+unknownsd <- rel_ab_sd(veg.wide.unk, veg.wide)
 
 
 
