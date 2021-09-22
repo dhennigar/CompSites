@@ -11,7 +11,7 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2015/csv/03-004.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2015/csv/10-003.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
 veg <- select(veg, 1:8) # workaround for some import issues of 2015 data
 
 
@@ -28,7 +28,7 @@ veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK", "ALGA
                                           "mud", "mud ", "wood", "wood ", "litter", "litter ",
                                           "Ground", "ground", "Ground ", "ground ", "bare ground",
                                           "rock", "rock ", "rocks", "gravel", "sand", "sand ",
-                                          "log", "log ", "Log", "Log ",
+                                          "log", "log ", "Log", "Log ", "leaf litter",
                                           "Bare ground at stems", "Bare ground from above",
                                           "bare ground at stems", "bare ground from above"))) # exclude non-veg entries
 
@@ -74,11 +74,15 @@ simpson <- diversity(veg.wide.nat, index = "simpson")
 
 # relative abundance
 rel_ab <- function(origin, total) {
-  return(mean(rowSums(origin)/rowSums(total)))
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(mean(originSums/totalSums, na.rm = TRUE))
 }
 
 rel_ab_sd <- function(origin, total) {
-  return(sd(rowSums(origin)/rowSums(total)))
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(sd(originSums/totalSums, na.rm = TRUE))
 }
 
 natives <- rel_ab(veg.wide.nat, veg.wide)
@@ -115,6 +119,6 @@ result <- data.frame(lyngbyeHeight,
 
 PC_result <- data.frame(PC_mean, PC_sd)
 
-write.csv(result, "./Results/2015/03-004-results.csv") # veg analysis results
-write.csv(species, "./Results/2015/03-004-species.csv") # unique species list
-write.csv(PC_result, "./Results/2015/03-004-percentcover.csv") # summary of percent cover for each species
+write.csv(result, "./Results/2015/10-003-results.csv") # veg analysis results
+write.csv(species, "./Results/2015/10-003-species.csv") # unique species list
+write.csv(PC_result, "./Results/2015/10-003-percentcover.csv") # summary of percent cover for each species

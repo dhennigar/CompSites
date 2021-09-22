@@ -67,11 +67,15 @@ simpson <- diversity(veg.wide.nat, index = "simpson")
 
 # relative abundance
 rel_ab <- function(origin, total) {
-  return(mean(rowSums(origin)/rowSums(total)))
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(mean(originSums/totalSums, na.rm = TRUE))
 }
 
 rel_ab_sd <- function(origin, total) {
-  return(sd(rowSums(origin)/rowSums(total)))
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(sd(originSums/totalSums, na.rm = TRUE))
 }
 
 natives <- rel_ab(veg.wide.nat, veg.wide)
