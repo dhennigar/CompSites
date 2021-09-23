@@ -4,14 +4,14 @@
 # libraries
 library(tidyverse)
 library(BiodiversityR)
-library(mosaic)
+
 # DATA IMPORT & PREP
 
 # Path relative to working directory. Run getwd() to see your current working directory. It should print your path to "CompSites".
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("C:/Users/User/Desktop/Github/CompSites/FieldData/2021/02-011.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2021/02-013.csv", fileEncoding="UTF-8-BOM") # Modify filepath per site.
 
 
 veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
@@ -51,7 +51,8 @@ PC_sd <- sapply(veg.wide, sd, na.rm=TRUE)
 data.frame(PC_mean, PC_sd)
 
 # mean height of tallest Carex lyngbyei
-lyngbyHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
+lyngbyeHeight <- mean(veg$MAX_LH_CM, na.rm=TRUE)
+lyngbyesd <- sd(veg$MAX_LH_CM, na.rm=TRUE)
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
@@ -63,31 +64,60 @@ shannon <- diversity(veg.wide.nat, index = "shannon")
 # simpson's diversity index (native)
 simpson <- diversity(veg.wide.nat, index = "simpson")
 
+
 # relative abundance
-natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
-invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
-exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
-unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.wide))
+rel_ab <- function(origin, total) {
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(mean(originSums/totalSums, na.rm = TRUE))
+}
+
+rel_ab_sd <- function(origin, total) {
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(sd(originSums/totalSums, na.rm = TRUE))
+}
+
+natives <- rel_ab(veg.wide.nat, veg.wide)
+nativesd <- rel_ab_sd(veg.wide.nat, veg.wide)
+
+invasives <- rel_ab(veg.wide.inv, veg.wide)
+invasivesd <- rel_ab_sd(veg.wide.inv, veg.wide)
+
+exotics <- rel_ab(veg.wide.exo, veg.wide)
+exoticsd <- rel_ab_sd(veg.wide.exo, veg.wide)
+
+unknowns <- rel_ab(veg.wide.unk, veg.wide)
+unknownsd <- rel_ab_sd(veg.wide.unk, veg.wide)
+
+
 
 # RESULTS (modify filepath)
 
-result <- data.frame(lyngbyHeight,
+result <- data.frame(lyngbyeHeight,
+                     lyngbyesd,
                      mean(richness),
                      mean(richness.nat),
                      mean(simpson),
+                     sd(simpson),
                      mean(shannon),
+                     sd(shannon),
                      natives,
+                     nativesd,
                      exotics,
+                     exoticsd,
                      invasives,
-                     unknowns)
+                     invasivesd,
+                     unknowns,
+                     unknownsd)
 
-PC_result <- data.frame (PC_mean, PC_sd)
+PC_result <- data.frame(PC_mean, PC_sd)
 
-write.csv(result, "./Results/2021/14-001-results.csv") # veg analysis results
+write.csv(result, "./Results/2021/02-013-results.csv") # veg analysis results
 
-write.csv(species, "./Results/2021/14-001-species.csv") # unique species list
+write.csv(species, "./Results/2021/02-013-species.csv") # unique species list
 
-write.csv(PC_result, "C:/Users/User/Desktop/Github/CompSites/Results/2021/02-011-percentcover.csv") # summary of percent cover for each species
+write.csv(PC_result, "./Results/2021/02-013-percentcover.csv") # summary of percent cover for each species
 #
 #
 #

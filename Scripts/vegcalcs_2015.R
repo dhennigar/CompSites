@@ -11,33 +11,37 @@ library(BiodiversityR)
 # If not, ensure you are working with the CompSites R project provided in the CompSites folder: "CompSites.Rproj".
 # Note that "." here represents the current working directory.
 
-veg <- read.csv("./FieldData/2015/Ref20.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- read.csv("./FieldData/2015/csv/10-004.csv", fileEncoding = "UTF-8-BOM") # Modify filepath per site.
+veg <- select(veg, 1:8) # workaround for some import issues of 2015 data
+
 
 # Prep the data
-veg$X..COVER <- as.numeric(veg$X..Cover) # ensure numeric cover data
+veg$PERCENT_COVER <- as.numeric(veg$PERCENT_COVER) # ensure numeric cover data
 veg <- subset(veg, COMMUNITY == 1 | is.na(COMMUNITY)) # select only community 1. Include "NA" for single community sites.
 
 # transform data for richness calculations
-veg.wide <- subset(veg, select = c(-Comments, -COMMUNITY, -SITE.ID, -Max.LH..cm., -N.E.I.T.U,
-                                   -ROBEL..cm., -X, -X.1, -X.2, -X.3, -Scientific, -FWR.SEED)) %>%
-  spread(Common, X..Cover) # long to wide format
+veg.wide <- subset(veg, select = c(-COMMUNITY, -SITE_ID, -MAX_LH, -ORIGIN, -Scientific)) %>%
+  spread(Common, PERCENT_COVER) # long to wide format
 veg.wide[is.na(veg.wide)] <- 0 # empty cells are zero
 veg.wide <- veg.wide[-1] # remove extra columns
-veg.wide <- veg.wide[-1]
 veg.wide <- veg.wide %>% select(-any_of(c("WOOD", "MUD", "LITTER", "ROCK", "ALGAE",
-                                          "Ground", "ground", "Ground ", "ground ",
-                                          "log", "log ", "Log", "Log "))) # exclude non-veg entries
+                                          "mud", "mud ", "wood", "wood ", "litter", "litter ",
+                                          "Ground", "ground", "Ground ", "ground ", "bare ground",
+                                          "rock", "rock ", "rocks", "gravel", "sand", "sand ",
+                                          "log", "log ", "Log", "Log ", "leaf litter",
+                                          "Bare ground at stems", "Bare ground from above",
+                                          "bare ground at stems", "bare ground from above"))) # exclude non-veg entries
 
 # generate species lists
-species <- subset(veg$Common, veg$N.E.I.T.U == "N" | veg$N.E.I.T.U == "E" | veg$N.E.I.T.U == "I") %>% # unique species list
+species <- subset(veg$Common, veg$ORIGIN == "N" | veg$ORIGIN == "E" | veg$ORIGIN == "I" | veg$ORIGIN == "U") %>% # unique species list
   unique() 
-species.nat <- subset(veg$Common, veg$N.E.I.T.U == "N") %>% # unique native species
+species.nat <- subset(veg$Common, veg$ORIGIN == "N") %>% # unique native species
   unique()
-species.inv <- subset(veg$Common, veg$N.E.I.T.U == "I") %>% # unique invasive species
+species.inv <- subset(veg$Common, veg$ORIGIN == "I") %>% # unique invasive species
   unique()
-species.exo <- subset(veg$Common, veg$N.E.I.T.U == "E") %>% # unique exotic species
+species.exo <- subset(veg$Common, veg$ORIGIN == "E") %>% # unique exotic species
   unique()
-species.unk <- subset(veg$Common, veg$N.E.I.T.U == "U") %>% # unique unknown species
+species.unk <- subset(veg$Common, veg$ORIGIN == "U") %>% # unique unknown species
   unique()
 
 
@@ -50,8 +54,13 @@ veg.wide.unk <- veg.wide %>% select(any_of(species.unk)) # select any non-native
 
 # CALCULATIONS
 
+#Percent cover summary
+PC_mean <- sapply(veg.wide, mean, na.rm = TRUE)
+PC_sd <- sapply(veg.wide, sd, na.rm = TRUE)
+
 # mean height of tallest Carex lyngbyei
-lyngbyeHeight <- mean(veg$Max.LH..cm.)
+lyngbyeHeight <- mean(veg$MAX_LH, na.rm = TRUE)
+lyngbyesd <- sd(veg$MAX_LH, na.rm = TRUE)
 
 # richness (native and total)
 richness <- specnumber(veg.wide)
@@ -64,22 +73,52 @@ shannon <- diversity(veg.wide.nat, index = "shannon")
 simpson <- diversity(veg.wide.nat, index = "simpson")
 
 # relative abundance
-natives <- mean(rowSums(veg.wide.nat)/rowSums(veg.wide))
-invasives <- mean(rowSums(veg.wide.inv)/rowSums(veg.wide))
-exotics <- mean(rowSums(veg.wide.exo)/rowSums(veg.wide))
-unknowns <- mean(rowSums(veg.wide.unk)/rowSums(veg.Wide))
+rel_ab <- function(origin, total) {
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(mean(originSums/totalSums, na.rm = TRUE))
+}
+
+rel_ab_sd <- function(origin, total) {
+  originSums <- rowSums(origin)
+  totalSums <- rowSums(total)
+  return(sd(originSums/totalSums, na.rm = TRUE))
+}
+
+natives <- rel_ab(veg.wide.nat, veg.wide)
+nativesd <- rel_ab_sd(veg.wide.nat, veg.wide)
+
+invasives <- rel_ab(veg.wide.inv, veg.wide)
+invasivesd <- rel_ab_sd(veg.wide.inv, veg.wide)
+
+exotics <- rel_ab(veg.wide.exo, veg.wide)
+exoticsd <- rel_ab_sd(veg.wide.exo, veg.wide)
+
+unknowns <- rel_ab(veg.wide.unk, veg.wide)
+unknownsd <- rel_ab_sd(veg.wide.unk, veg.wide)
+
 
 # RESULTS (modify filepath)
 
 result <- data.frame(lyngbyeHeight,
+                     lyngbyesd,
                      mean(richness),
                      mean(richness.nat),
                      mean(simpson),
+                     sd(simpson),
                      mean(shannon),
+                     sd(shannon),
                      natives,
+                     nativesd,
                      exotics,
+                     exoticsd,
                      invasives,
-                     unknowns)
+                     invasivesd,
+                     unknowns,
+                     unknownsd)
 
-write.csv(result, "./Results/2015/Ref20.csv") # veg analysis results
-write.csv(species, "./Results/2015/Ref20.csv") # unique species list
+PC_result <- data.frame(PC_mean, PC_sd)
+
+write.csv(result, "./Results/2015/10-004-results.csv") # veg analysis results
+write.csv(species, "./Results/2015/10-004-species.csv") # unique species list
+write.csv(PC_result, "./Results/2015/10-004-percentcover.csv") # summary of percent cover for each species
