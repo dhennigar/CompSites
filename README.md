@@ -6,6 +6,5 @@ In addition to raw data, this repo contains code for regression analyses used to
 
 Should you have any questions, please feel free to reach out to the research lead @ daniel.stewart@asarum.org
 
-![Image of mars]
-(https://github.com/dhennigar/CompSites/blob/de8d638ebe9e88849f71cb2d1e7dd821af2ed1e3/IMG_4764.jpg)
+![Image of marsh](https://github.com/dhennigar/CompSites/blob/de8d638ebe9e88849f71cb2d1e7dd821af2ed1e3/IMG_4764.jpg)
 
