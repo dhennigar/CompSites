@@ -13,98 +13,32 @@ library("LMERConvenienceFunctions")
 library("visreg")
 library("MuMIn")
 
+
+#NOTE: THIS IS A WORK IN PROGRESS: AS OF 09/22 THIS IS A COMPILATION OF CODE FRAGMENTS!
+
 #LOADING .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Example.csv") 
 
+COMPSITES <- MASTERDATA %>%
+  filter(REFERENCE == "NO") 
 
-
-
-JULYDATA <- MASTERDATA %>%
-  filter(MONTH == "JULY") %>%
-  group_by(YEAR, TREATMENTCODE)
-JULYDATA$YEAR = as.factor(JULYDATA$YEAR)
-JULYDATA$TREATMENT1 = as.factor(JULYDATA$TREATMENT1)
-JULYDATA = JULYDATA[complete.cases(JULYDATA),]
-
-
-AUGUSTDATA <- MASTERDATA %>%
-  filter(MONTH == "AUGUST") %>%
-  group_by(YEAR, TREATMENTCODE)
-AUGUSTDATA$YEAR = as.factor(AUGUSTDATA$YEAR)
-
-## STEP 1: VISUALIZING DATA ##
-
-
-
-
-
-
-
-#July Data
-JULYDATA$TREATMENT1 <- factor(JULYDATA$TREATMENT1, levels = c("CONTROL", "TWICE", "THRICE"))
-JULYDATA$TREATMENT1
-levels(JULYDATA$TREATMENT1) <- c("CONTROL", "2 X CUT", "3 X CUT")
-JULYRAMETBOX <- ggboxplot(
-  JULYDATA, x = 'TREATMENT2', y = "RAMETS",
-  color = "YEAR", facet.by = "TREATMENT1",
-  add="jitter",
-  xlab="LITTER", ylab="Living Ramets/Plot") +
-  stat_compare_means(comparisons = my_comparisons, label = "p.signif")+  
-  stat_compare_means(label.y = 50) 
-JULYRAMETBOX
-
-#August Data
-AUGUSTDATA$TREATMENT1 <- factor(AUGUSTDATA$TREATMENT1, levels = c("CONTROL", "TWICE", "THRICE"))
-AUGUSTDATA$TREATMENT1
-levels(AUGUSTDATA$TREATMENT1) <- c("CONTROL", "2 X CUT", "3 X CUT")
-AUGUSTRAMETBOX <- ggboxplot(
-  AUGUSTDATA, x = 'TREATMENT2', y = "RAMETS",
-  color = "YEAR", facet.by = "TREATMENT1",
-  add="jitter",
-  xlab="LITTER", ylab="Living Ramets/Plot") 
-AUGUSTRAMETBOX
-
-#standardize scale
-JULYRAMETBOX <- ggpar(JULYRAMETBOX, ylim = c(0, 60))
-AUGUSTRAMETBOX <- ggpar(AUGUSTRAMETBOX, ylim = c(0, 60))
-
-##tinkering with arrangement for final figure
-
-RAMETARRANGE <- plot_grid(
-  JULYRAMETBOX + theme(legend.position = "none"),
-  AUGUSTRAMETBOX + theme (legend.position = "none"),
-  scale = .92,
-  align = 'vh',
-  labels = c("JULY", "AUGUST"),
-  hjust = c(-.8,-.5),
-  vjust = 1.2,
-  nrow = 1
-)
-RAMETARRANGE
-
-#extract legend from first plot
-legend <- get_legend(
-  JULYRAMETBOX +
-    guides(color = guide_legend(nrow = 1)) +
-    theme(legend.position = "bottom")
-)
-
-##FIGURE FOR PAPER## 
-RAMETFIGURE <- plot_grid(RAMETARRANGE, legend, ncol = 1, rel_heights = c(1, .1))
-RAMETFIGURE
-
+#%>%
+ 
+# group_by(YEAR, TREATMENTCODE)
+#JULYDATA$YEAR = as.factor(JULYDATA$YEAR)
+#JULYDATA$TREATMENT1 = as.factor(JULYDATA$TREATMENT1)
+#JULYDATA = JULYDATA[complete.cases(JULYDATA),]
 
 ### STEP 2: DATA ANALYSIS (JULY) ### 
 
 #JULY: one extreme outlier, but left because they are not likely to be consequential
-outliers <- JULYDATA %>%
-  group_by(YEAR, TREATMENTCODE) %>%
-  identify_outliers(RAMETS)
+outliers <- COMPSITES %>%
+  identify_outliers(ELEV_MEAN)
 view(outliers)
 
 #checking normality assumption
 #JULY
-ggqqplot(JULYDATA, "RAMETS", ggtheme = theme_bw()) +
+ggqqplot(JULYDATA, "ELEV_MEAN", ggtheme = theme_bw()) +
   facet_grid(YEAR ~ TREATMENTCODE, labeller = "label_both")
 fit.gamma <- fitdist(JULYDATA$RAMETS, distr = "gamma", method = "mme")
 plot(fit.gamma)
