@@ -1,5 +1,4 @@
-# CompSites
-Fraser River Estuary compensation site assessments.
+#Fraser River Estuary Compensation Sites
 
 The following repo contains marsh habitat compensation site data collected in 2015 and 2021 in the Fraser River Estuary. Data from 2015 were collected by Megan Lievesley and Daniel Stewart (BC Conservation Foundation), with funding and direction from Brad Mason and Rob Knight of the Community Mapping Network. Data from 2021 were collected by Daniel Hennigar, Robyn Ingham (Ducks Unlimited Canada) and Daniel Stewart (Asarum Ecological Consulting).
 
