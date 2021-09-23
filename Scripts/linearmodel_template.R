@@ -13,9 +13,11 @@ library("LMERConvenienceFunctions")
 library("visreg")
 library("MuMIn")
 
+#LOADING .CSV 
+MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Example.csv") 
 
-#LOADING .CSV AND ADDING DESCRIPTOR COLUMNS
-MASTERDATA <- read.csv("~/Git/TyphaData/FieldData/DATA_MASTER.csv") 
+
+
 
 JULYDATA <- MASTERDATA %>%
   filter(MONTH == "JULY") %>%
