@@ -10,28 +10,89 @@ VegImport <- function(filepath){
   return(df)
 }
 
-VegLongCleanup <- function(data, columnNames){
-  # keep only necessary columns
-  cleanData <- data |> select(columnNames)
-  return(cleanData)
-}
-
 VegLongToWide <- function(data){
+  # select columns
+  cleanData <- data |> select(c(PLOT, SPECIES_CODE, PERCENT_COVER))
   # flip data to wide format
-  wideData <- data |> spread(SPECIES_CODE, PERCENT_COVER)
+  wideData <- cleanData |> spread(SPECIES_CODE, PERCENT_COVER)
+  wideData[is.na(wideData)] <- 0
+  wideData <- wideData[-1]
   return(wideData)
 }
 
-VegUniqueSpecies <- function(data, origin){
+VegUniqueSpecies <- function(data){
   # returns list of species of given an origin
-  speciesList <- subset(data$SPECIES_CODE, data$ORIGIN == origin)
-  return(speciesList)
+  n <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "N"))
+  e <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "E"))
+  i <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "I"))
+  u <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "U"))
+  s <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "S"))
+  plants <- list(n, e, i, u, s)
+  names(plants) <- c("native", "exotic", "invasive", "unknown", "substrate")
+  return(plants)
 }
 
-VegRelativeAbundance <- function(veg_subset, veg_total){
-  ra <- mean(rowSums(veg_subset)/rowSums(veg_total))
-  sd <- sd(rowSums(veg_subset)/rowSums(veg_total))
-  result <- data.frame(ra, sd)
+VegPercentCoverStats <- function(data){
+  # takes wide veg data and returns percent cover summary stats
+  pcMean <- sapply(data, mean, na.rm = TRUE)
+  pcSD <- sapply(data, sd, na.rm = TRUE)
+  pcMax <- sapply(data, max, na.rm = TRUE)
+  pcMin <- sapply(data, min, na.rm = TRUE)
+  result <- data.frame(pcMean, pcSD, pcMax, pcMin)
+  return(result)
+}
+
+VegRelativeAbundance <- function(wideData, plantLists){
+  # takes wide data and plants list and returns relative abundance stats.
+  
+  n <- select(wideData, plantLists$native)
+  e <- select(wideData, plantLists$exotic)
+  i <- select(wideData, plantLists$invasive)
+  u <- select(wideData, plantLists$unknown)
+  
+  n_ra <- mean(rowSums(n)/rowSums(wideData))
+  n_sd <- sd(rowSums(n)/rowSums(wideData))
+  e_ra <- mean(rowSums(e)/rowSums(wideData))
+  e_sd <- sd(rowSums(e)/rowSums(wideData))
+  i_ra <- mean(rowSums(i)/rowSums(wideData))
+  i_sd <- sd(rowSums(i)/rowSums(wideData))
+  u_ra <- mean(rowSums(u)/rowSums(wideData))
+  u_sd <- sd(rowSums(u)/rowSums(wideData))
+  
+  result <- data.frame(n_ra, n_sd,
+                       e_ra, e_sd,
+                       i_ra, i_sd,
+                       u_ra, u_sd)
+  
+  return(result)
+}
+
+VegStats <- function(longData, wideData, plantLists){
+  
+  lyngbyeMean <- mean(longData$MAX_LH_CM, na.rm = TRUE)
+  lyngbyeSD <- sd(longData$MAX_LH_CM, na.rm = TRUE)
+  
+  richnessMean <- mean(specnumber(select(wideData, -plantLists$substrate)))
+  richnessSD <- sd(specnumber(select(wideData, -plantLists$substrate)))
+  nativeRichnessMean <- mean(specnumber(select(wideData, -plantLists$native)))
+  nativeRichnessSD <- sd(specnumber(select(wideData, plantLists$native)))
+  
+  if(length(plantLists$native) == 0){
+    shannon <- NA
+    shannonSD <- NA
+    simpson <- NA
+    simpsonSD <- NA
+  } else {
+    shannon <- mean(diversity(select(wideData, plantLists$native), index = "shannon"))
+    shannonSD <- sd(diversity(select(wideData, plantLists$native), index = "shannon"))
+    simpson <- mean(diversity(select(wideData, plantLists$native), index = "simpson"))
+    simpsonSD <- sd(diversity(select(wideData, plantLists$native), index = "simpson"))
+  }
+  
+  result <- data.frame(lyngbyeMean, lyngbyeSD,
+                       richnessMean, richnessSD,
+                       nativeRichnessMean, nativeRichnessSD,
+                       shannon, shannonSD, simpson, simpsonSD)
   return(result)
 }
 
