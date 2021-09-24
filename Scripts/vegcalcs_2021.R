@@ -4,7 +4,7 @@
 # libraries
 library(tidyverse)
 library(BiodiversityR)
-
+source("./Scripts/VegFunctions.R")
 # DATA IMPORT & PREP
 
 # Path relative to working directory. Run getwd() to see your current working directory. It should print your path to "CompSites".
