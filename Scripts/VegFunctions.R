@@ -1,6 +1,6 @@
 # Function definitions for vegetation analysis
-#
-#
+# To be sourced by 2021 or 2015 analysis scripts.
+# Functions expect attributes "SPECIES_CODE", "PERCENT_COVER", and "ORIGIN".
 
 VegImport <- function(filepath){
   # import vegetation data from a csv file
