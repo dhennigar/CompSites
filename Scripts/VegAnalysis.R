@@ -24,7 +24,7 @@ for(i in 1:length(files)){
   
   # veg percent cover summary stats
   pcStats <- VegPercentCoverStats(vegWide)
-  write.csv(pcStats, paste(resultspath, "PC_Stats_", files[i], sep = ""))
+  write.csv(pcStats, paste(resultspath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
   
   # site veg community statistics
   siteStats <- VegStats(vegLong, vegWide, plants)

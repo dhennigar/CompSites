@@ -21,7 +21,7 @@ VegLongToWide <- function(data){
 }
 
 VegUniqueSpecies <- function(data){
-  # returns list of species of given an origin
+  # returns lists of unique species of each origin type.
   n <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "N"))
   e <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "E"))
   i <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "I"))
@@ -49,15 +49,16 @@ VegRelativeAbundance <- function(wideData, plantLists){
   e <- select(wideData, plantLists$exotic)
   i <- select(wideData, plantLists$invasive)
   u <- select(wideData, plantLists$unknown)
+  total <- select(wideData, -plantLists$substrate)
   
-  n_ra <- mean(rowSums(n)/rowSums(wideData))
-  n_sd <- sd(rowSums(n)/rowSums(wideData))
-  e_ra <- mean(rowSums(e)/rowSums(wideData))
-  e_sd <- sd(rowSums(e)/rowSums(wideData))
-  i_ra <- mean(rowSums(i)/rowSums(wideData))
-  i_sd <- sd(rowSums(i)/rowSums(wideData))
-  u_ra <- mean(rowSums(u)/rowSums(wideData))
-  u_sd <- sd(rowSums(u)/rowSums(wideData))
+  n_ra <- mean(rowSums(n)/rowSums(total), na.rm = TRUE)
+  n_sd <- sd(rowSums(n)/rowSums(total), na.rm = TRUE)
+  e_ra <- mean(rowSums(e)/rowSums(total), na.rm = TRUE)
+  e_sd <- sd(rowSums(e)/rowSums(total), na.rm = TRUE)
+  i_ra <- mean(rowSums(i)/rowSums(total), na.rm =TRUE)
+  i_sd <- sd(rowSums(i)/rowSums(total), na.rm =TRUE)
+  u_ra <- mean(rowSums(u)/rowSums(total), na.rm = TRUE)
+  u_sd <- sd(rowSums(u)/rowSums(total), na.rm = TRUE)
   
   result <- data.frame(n_ra, n_sd,
                        e_ra, e_sd,
