@@ -2,11 +2,17 @@
 # To be sourced by 2021 or 2015 analysis scripts.
 # Functions expect attributes "SPECIES_CODE", "PERCENT_COVER", and "ORIGIN".
 
-VegImport <- function(filepath){
+VegImport <- function(filepath, year){
   # import vegetation data from a csv file
   df <- read.csv(filepath, fileEncoding = "UTF-8-BOM")
   df$PERCENT_COVER <- as.numeric(df$PERCENT_COVER)
   df <- subset(df, COMMUNITY == 1)
+  
+  if(year == "2015"){
+    df <- df[1:8]
+    df$MAX_LH_CM <- df$MAX_LH
+  }
+ 
   return(df)
 }
 
