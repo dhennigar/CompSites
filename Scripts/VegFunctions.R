@@ -9,8 +9,8 @@ VegImport <- function(filepath, year){
   df <- subset(df, COMMUNITY == 1)
   
   if(year == "2015"){
-    df <- df[1:8]
-    df$MAX_LH_CM <- df$MAX_LH
+    df <- df[1:8] # reduce issues with 2015 data importing
+    df$MAX_LH_CM <- df$MAX_LH # rename Lyngbye height column
   }
  
   return(df)

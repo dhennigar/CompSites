@@ -16,12 +16,7 @@ ProjectResults <- data.frame()
 for(i in 1:length(files)){
   # import each csv and transform to wide format
   # only community 1 (marsh) is considered
-  vegLong <- VegImport(paste(datapath, files[i], sep = ""))
-  if(year == "2015"){
-    vegLong <- vegLong[1:8]
-  }
-  
-  # flip data to wide format for diversity calculations
+  vegLong <- VegImport(paste(datapath, files[i], sep = ""), year = year)
   vegWide <- VegLongToWide(vegLong)
   
   # unique species list for each origin, used in other calculations.
@@ -36,8 +31,10 @@ for(i in 1:length(files)){
   relativeAbundance <- VegRelativeAbundance(vegWide, plants)
   siteStats <- c(siteStats, relativeAbundance)
   
+  # add new row for each site
   ProjectResults <- rbind(ProjectResults, siteStats)
 }
 
-ProjectResults$Site_ID <- str_remove(files, ".csv")
+ProjectResults$Site_ID <- str_remove(files, ".csv") # add site id column to results
+ProjectResults$RA_Sum <- rowSums(select(ProjectResults, c("n_ra", "e_ra", "i_ra", "u_ra"))) # this should be 1 for every site.
 write.csv(ProjectResults, paste(resultspath, "VegDataResults_", year, ".csv", sep = ""))
