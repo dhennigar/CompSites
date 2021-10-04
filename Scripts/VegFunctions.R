@@ -17,10 +17,10 @@ VegImport <- function(filepath, year){
 }
 
 VegLongToWide <- function(data){
-  # select columns
-  cleanData <- data |> select(c(PLOT, SPECIES_CODE, PERCENT_COVER))
-  # flip data to wide format
-  wideData <- cleanData |> spread(SPECIES_CODE, PERCENT_COVER)
+  # convert veg data from long to wide format
+  wideData <- data |>
+    select(c(PLOT, SPECIES_CODE, PERCENT_COVER)) |>
+    spread(SPECIES_CODE, PERCENT_COVER)
   wideData[is.na(wideData)] <- 0
   wideData <- wideData[-1]
   return(wideData)
