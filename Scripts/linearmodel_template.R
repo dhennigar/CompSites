@@ -29,14 +29,16 @@ FRECOMPSITES <- COMPSITES %>%
 
 ##Research Question #1: What factors affect marshes being vegetated?
 #MODEL 1: Percent Marsh
-MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + AGE + AREA_MAPPED + OFFSHORE_STRUCTURE + DIST_UPRIVER)^3, data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + AGE + AREA_MAPPED + OFFSHORE_STRUCTURE + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MARSH ~ (AGE + AREA_MAPPED + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN)^2, data = FRECOMPSITES)
+
 
 summary(MODEL1)
 anova(MODEL1)
 
 #performing dredge for optimal models
 options(na.action="na.fail")
-DREDGE <- dredge(MODEL, rank = "AICc")
+DREDGE <- dredge(MODEL1, rank = "AICc")
 DREDGE
 
 #isolating best model
