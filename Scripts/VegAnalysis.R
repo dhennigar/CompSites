@@ -1,4 +1,4 @@
-# Analysis script for FRE CompSites 2021
+# Analysis script for FRE Compensation Sites
 
 
 library(tidyverse)
@@ -35,6 +35,10 @@ for(i in 1:length(files)){
   ProjectResults <- rbind(ProjectResults, siteStats)
 }
 
-ProjectResults$Site_ID <- str_remove(files, ".csv") # add site id column to results
-ProjectResults$RA_Sum <- rowSums(select(ProjectResults, c("n_ra", "e_ra", "i_ra", "u_ra"))) # this should be 1 for every site.
+ProjectResults$Site_ID <- files |>
+  str_remove(".csv")
+ProjectResults$RA_Sum <- ProjectResults |>
+  select(c("n_ra", "e_ra", "i_ra", "u_ra")) |>
+  rowSums()
+
 write.csv(ProjectResults, paste(resultspath, "VegDataResults_", year, ".csv", sep = ""))

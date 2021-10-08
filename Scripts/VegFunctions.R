@@ -28,11 +28,26 @@ VegLongToWide <- function(data){
 
 VegUniqueSpecies <- function(data){
   # returns lists of unique species of each origin type.
-  n <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "N"))
-  e <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "E"))
-  i <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "I"))
-  u <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "U"))
-  s <- unique(subset(data$SPECIES_CODE, data$ORIGIN == "S"))
+  n <- data$SPECIES_CODE |>
+    subset(data$ORIGIN == "N") |>
+    unique()
+  
+  e <- data$SPECIES_CODE |>
+    subset(data$ORIGIN == "E") |>
+    unique()
+  
+  i <- data$SPECIES_CODE |>
+    subset(data$ORIGIN == "I") |>
+    unique()
+  
+  u <- data$SPECIES_CODE |>
+    subset(data$ORIGIN == "U") |>
+    unique()
+  
+  s <- data$SPECIES_CODE |>
+    subset(data$ORIGIN == "S") |>
+    unique()
+  
   plants <- list(n, e, i, u, s)
   names(plants) <- c("native", "exotic", "invasive", "unknown", "substrate")
   return(plants)
