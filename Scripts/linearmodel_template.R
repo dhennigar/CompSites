@@ -22,6 +22,9 @@ MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv")
 COMPSITES <- MASTERDATA %>%
   filter(REFERENCE == "NO") 
 
+REFSITES <- MASTERDATA %>%
+  filter(REFERENCE == "YES") 
+
 #Creating Fraser Subset (No Serp/Nico) 
 FRECOMPSITES <- COMPSITES %>%
   filter(RIVER != "Serpentine") %>%
@@ -29,12 +32,12 @@ FRECOMPSITES <- COMPSITES %>%
 
 ##Research Question #1: What factors affect marshes being vegetated?
 #MODEL 1: Percent Marsh
-MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + AGE + AREA_MAPPED + OFFSHORE_STRUCTURE + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-MODEL1 <- lm(PRCNT_MARSH ~ (AGE + AREA_MAPPED + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN)^2, data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + AGE + AREA_MAPPED + OFFSHORE_STRUCTURE + DIST_UPRIVER + PRCNT_EDGE  + ELEV_MEAN)^2, data = FRECOMPSITES)
 
+MODEL2 <- lm(RC_Native ~ (TYPE + LOG_FENCE + SHEAR_BOOM + AGE + AREA_MAPPED + OFFSHORE_STRUCTURE + DIST_UPRIVER + PRCNT_EDGE  + ELEV_MEAN), data = FRECOMPSITES)
 
 summary(MODEL1)
-anova(MODEL1)
+anova(MODEL2)
 
 #performing dredge for optimal models
 options(na.action="na.fail")
