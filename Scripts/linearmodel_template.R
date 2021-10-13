@@ -27,6 +27,11 @@ MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv")
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
 MASTERDATA$GRAZING <- as.factor(MASTERDATA$GRAZING)
 
+#Creating Fraser-only Subset
+FRASERSITES <- MASTERDATA %>%
+  filter(RIVER != "Serpentine") %>%
+  filter(RIVER != "Nicomekl")
+
 #Creating Compsite Subset (No REF Sites) 
 COMPSITES <- MASTERDATA %>%
   filter(REFERENCE == "NO") 
@@ -44,22 +49,55 @@ FRECOMPSITES <- COMPSITES %>%
 
 ##Research Question #1: What factors affect marshes being vegetated?
 #MODEL 1: Percent Marsh
-MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
 summary(MODEL1)
-anova(MODEL1)
+Anova(MODEL1)
 AIC(MODEL1)
+vif(MODEL1)
+
+#MODEL 1 VISUALISATION 
+plot(MODEL1)
+visreg(MODEL1, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
 
-#model selection (INVASIVE DOMINANCE)
-MODEL2 <- lm(RC_Invasive ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-anova(MODEL2)
+#Research Question #2: What factors affect the health of existing marshes?
 
-MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-anova(MODEL3)
+#Invasive Dominance
+MODEL2 <- lm(RC_Invasive ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+summary(MODEL2)
+Anova(MODEL2, type =3)
+AIC(MODEL2)
+vif(MODEL2)
 
-MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN)^2, data = FRECOMPSITES)
-anova(MODEL4)
+#MODEL 2 VISUALISATION 
+plot(MODEL2)
+visreg(MODEL2, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
+#Native Dominance
+#note that I ran a similar model with REF sites included (with age and a few comp site variables removed, and found similar results)
+MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+summary(MODEL3)
+Anova(MODEL3, type =3)
+AIC(MODEL3)
+vif(MODEL3)
+
+#MODEL 3 VISUALISATION 
+plot(MODEL3)
+visreg(MODEL3, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
+
+
+#Native Richness
+MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+summary(MODEL4)
+Anova(MODEL4)
+AIC(MODEL4)
+vif(MODEL4)
+
+#ALL FRASER
+MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE  + DIST_UPRIVER*ARM_1 + ELEV_MEAN), data = FRASERSITES)
+
+
 
 MODEL5 <- lm(COM1_SimpDiv ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
 anova(MODEL5)
