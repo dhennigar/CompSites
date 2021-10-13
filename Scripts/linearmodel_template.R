@@ -20,13 +20,12 @@ library("cowplot")
 
 
 #NOTE: THIS IS A WORK IN PROGRESS
-#remember to acknowledge authors of Chalifour et al. for coding 
-
 #LOADING MASTER DATA .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv") 
 
 #ensuring sampling year is categorical
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
+MASTERDATA$GRAZING <- as.factor(MASTERDATA$GRAZING)
 
 #Creating Compsite Subset (No REF Sites) 
 COMPSITES <- MASTERDATA %>%
@@ -39,6 +38,50 @@ REFSITES <- MASTERDATA %>%
 FRECOMPSITES <- COMPSITES %>%
   filter(RIVER != "Serpentine") %>%
   filter(RIVER != "Nicomekl")
+
+
+###EXPLANATORY MODEL
+
+##Research Question #1: What factors affect marshes being vegetated?
+#MODEL 1: Percent Marsh
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+
+summary(MODEL1)
+anova(MODEL1)
+AIC(MODEL1)
+
+
+#model selection (INVASIVE DOMINANCE)
+MODEL2 <- lm(RC_Invasive ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+anova(MODEL2)
+
+MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+anova(MODEL3)
+
+MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN)^2, data = FRECOMPSITES)
+anova(MODEL4)
+
+MODEL5 <- lm(COM1_SimpDiv ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+anova(MODEL5)
+
+MODEL6 <- glm(GRAZING ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + ELEV_MEAN),family = "poisson", data = FRECOMPSITES)
+summary(MODEL6)
+Anova(MODEL6)
+
+MODEL7 <- lm(PRCENT_LOG2 ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+anova(MODEL7)
+
+
+
+
+
+
+
+
+
+###PREDICTIVE MODELLING EXAMPLES
+
+
 
 ##Research Question #1: What factors affect marshes being vegetated?
 #MODEL 1: Percent Marsh
@@ -65,7 +108,7 @@ ggpairs(data = na.omit(sitecovar), title = "Pearson Correlation plot for all var
 
 
 #model selection
-MODEL1 <- lm(RC_Invasive~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + GRAZING + ELEV_MEAN), data = FRECOMPSITES,na.action = "na.fail")
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + GRAZING + ELEV_MEAN), data = FRECOMPSITES,na.action = "na.fail")
 summary(MODEL1) #AIC 746.4772
 AIC(MODEL1)
 
@@ -76,6 +119,8 @@ vif(MODEL1)
 ### Model selection using dredge function  
 # Generate model set
 model.set.1 <- dredge(MODEL1) 
+
+Anova(MODEL1)
 
 # Create model selection table
 model_table.1 <- model.sel(model.set.1)
@@ -97,6 +142,10 @@ r = data.frame(Coeff=rownames(avg_model_1.4df, rep(NA, length(avg_model_componen
 avg_model_components1.4<- cbind(avg_model_components1.4,r)
 avg_model_components1.4<- avg_model_components1.4[, -c(6,7)] 
 #write.csv(avg_model_components1.4, "~/Documents/R/CompSites/ModelOutputs/model1_componentsummary.csv")
+
+#isolation of best model
+model1best <- get.models()
+
 
 importance(model.set.1.4)
 
