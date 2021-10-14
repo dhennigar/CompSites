@@ -44,6 +44,8 @@ FRECOMPSITES <- COMPSITES %>%
   filter(RIVER != "Serpentine") %>%
   filter(RIVER != "Nicomekl")
 
+FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
+  filter(TYPHA_PRES == "N")
 
 ###EXPLANATORY MODEL
 
@@ -62,7 +64,7 @@ visreg(MODEL1, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
 #Research Question #2: What factors affect the health of existing marshes?
 
-#Invasive Dominance
+#MODEL 2:Invasive Dominance
 MODEL2 <- lm(RC_Invasive ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
 summary(MODEL2)
 Anova(MODEL2, type =3)
@@ -73,7 +75,7 @@ vif(MODEL2)
 plot(MODEL2)
 visreg(MODEL2, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
-#Native Dominance
+#MODEL 3:Native Dominance
 #note that I ran a similar model with REF sites included (with age and a few comp site variables removed, and found similar results)
 MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
 summary(MODEL3)
@@ -81,33 +83,42 @@ Anova(MODEL3, type =3)
 AIC(MODEL3)
 vif(MODEL3)
 
+#Cattail seems to be an outlier in following traditional estuarine trends, so the following code runs the model with cattail-absent sites only (results were more significant)
+#MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITESNOCATTAIL)
+#summary(MODEL3)
+#Anova(MODEL3, type =3)
+#AIC(MODEL3)
+#vif(MODEL3)
+
 #MODEL 3 VISUALISATION 
 plot(MODEL3)
 visreg(MODEL3, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
-
-
-#Native Richness
+#MODEL 4:Native Richness
 MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
 summary(MODEL4)
 Anova(MODEL4)
 AIC(MODEL4)
 vif(MODEL4)
 
-#ALL FRASER
-MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE  + DIST_UPRIVER*ARM_1 + ELEV_MEAN), data = FRASERSITES)
+#MODEL 4 VISUALISATION 
+plot(MODEL4)
+visreg(MODEL4, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
-
-
+#MODEL 5:Simpson's Diversity 
 MODEL5 <- lm(COM1_SimpDiv ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
 anova(MODEL5)
 
-MODEL6 <- glm(GRAZING ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + ELEV_MEAN),family = "poisson", data = FRECOMPSITES)
+#MODEL 6:Grazing Intensity 
+MODEL6 <- lm(CARELYN_MH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1*DIST_UPRIVER + PRCNT_EDGE + ELEV_MEAN), data = FRECOMPSITES)
 summary(MODEL6)
 Anova(MODEL6)
 
-MODEL7 <- lm(PRCENT_LOG2 ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-anova(MODEL7)
+#MODEL 7: LOG DEBRIS
+MODEL7 <- lm(PRCENT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + ELEV_MEAN), data = FRECOMPSITES)
+summary(MODEL7)
+Anova(MODEL7)
+visreg(MODEL7, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
 
 
