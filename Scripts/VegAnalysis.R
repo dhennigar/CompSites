@@ -5,9 +5,9 @@ library(tidyverse)
 library(BiodiversityR)
 source("./Scripts/VegFunctions.R")
 
-datapath <- "./FieldData/2015/csv/"
-resultspath <- "./Results/2015/"
-year <- "2015"
+datapath <- "./FieldData/2021/"
+resultspath <- "./Results/2021/"
+year <- "2021"
 
 files <- list.files(datapath)
 
@@ -37,6 +37,7 @@ for(i in 1:length(files)){
 
 ProjectResults$Site_ID <- files |>
   str_remove(".csv")
+
 ProjectResults$RA_Sum <- ProjectResults |>
   select(c("n_ra", "e_ra", "i_ra", "u_ra")) |>
   rowSums()
