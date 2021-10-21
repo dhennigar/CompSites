@@ -17,6 +17,7 @@ library("GGally")
 library("knitr")
 library("piecewiseSEM")
 library("cowplot")
+library("sjPlot")
 
 
 #NOTE: THIS IS A WORK IN PROGRESS
@@ -25,81 +26,142 @@ MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv")
 
 #ensuring sampling year is categorical
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
-MASTERDATA$GRAZING <- as.factor(MASTERDATA$GRAZING)
+MASTERDATA$REFERENCE <- as.factor(MASTERDATA$REFERENCE)
+#MASTERDATA$GRAZING <- as.factor(MASTERDATA$GRAZING)
 
 #Creating Fraser-only Subset
 FRASERSITES <- MASTERDATA %>%
-  filter(RIVER != "Serpentine") %>%
-  filter(RIVER != "Nicomekl")
-
-#Creating Compsite Subset (No REF Sites) 
-COMPSITES <- MASTERDATA %>%
+  filter(RIVER == "Fraser") 
+  
+#Creating Fraser Compsite Subset (No REF Sites) 
+FRECOMPSITES <- FRASERSITES %>%
   filter(REFERENCE == "NO") 
 
-REFSITES <- MASTERDATA %>%
+#Creating Ref Site Subset (No Comp Sites)
+FREREFSITES <- FRASERSITES %>%
   filter(REFERENCE == "YES") 
-
-#Creating Fraser Subset (No Serp/Nico) 
-FRECOMPSITES <- COMPSITES %>%
-  filter(RIVER != "Serpentine") %>%
-  filter(RIVER != "Nicomekl")
 
 FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
   filter(TYPHA_PRES == "N")
 
-###EXPLANATORY MODEL
+###EXPLANATORY MODELS
 
-##Research Question #1: What factors affect marshes being vegetated?
-#MODEL 1: Percent Marsh
-MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
-summary(MODEL1)
-Anova(MODEL1)
-AIC(MODEL1)
-vif(MODEL1)
+###Research Question #1: What factors affect marshes being vegetated?
 
-#MODEL 1 VISUALISATION 
+#MODEL 1A: Percent Marsh
+#Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
+
+MODEL1A <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM_1 + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+summary(MODEL1A)
+plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
+Anova(MODEL1A, type = 3)
+
+vif(MODEL1A)
 plot(MODEL1)
 visreg(MODEL1, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
+#MODEL 1B: Percent Mudflat
+#Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
+#Mudflat is not the inverse of vegetated marsh (log debris is the third category)
 
-#Research Question #2: What factors affect the health of existing marshes?
+MODEL1B <- lm(PRCNT_MUDFLAT ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM_1 + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+summary(MODEL1B)
+Anova(MODEL1B, type = 3)
+AIC(MODEL1B)
+vif(MODEL1B)
+plot(MODEL1B)
+visreg(MODEL1B, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL1B, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
 
-#MODEL 2:Invasive Dominance
-MODEL2 <- lm(RC_Invasive ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-summary(MODEL2)
-Anova(MODEL2, type =3)
-AIC(MODEL2)
-vif(MODEL2)
+#MODEL 1C: Percent Logs
+#Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
+#Mudflat is not the inverse of vegetated marsh (log debris is the third category)
+MODEL1C <- lm(PRCENT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM_1 + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+summary(MODEL1C)
+Anova(MODEL1C, type = 3)
+vif(MODEL1C)
+plot(MODEL1C)
+visreg(MODEL1C, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL1C, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
 
-#MODEL 2 VISUALISATION 
-plot(MODEL2)
-visreg(MODEL2, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
-#MODEL 3:Native Dominance
+###Research Question #2: What factors affect the health of existing marshes?
+
+#MODEL 2A:Invasive Dominance
+#currently two interactions are included: elevation*distance upriver and arm*distance upriver
+MODEL2A <- lm(RC_Invasive ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
+summary(MODEL2A)
+Anova(MODEL2A, type =3)
+AIC(MODEL2A)
+vif(MODEL2A)
+plot(MODEL2A)
+visreg(MODEL2A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL2A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
+
+#MODEL 2B:Native Dominance
 #note that I ran a similar model with REF sites included (with age and a few comp site variables removed, and found similar results)
-MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-summary(MODEL3)
-Anova(MODEL3, type =3)
-AIC(MODEL3)
-vif(MODEL3)
+MODEL2B <- lm(RC_Native ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
+summary(MODEL2B)
+Anova(MODEL2B, type =3)
+AIC(MODEL2B)
+vif(MODEL2B)
+plot(MODEL2B)
+visreg(MODEL2B, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL2B, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
-#Cattail seems to be an outlier in following traditional estuarine trends, so the following code runs the model with cattail-absent sites only (results were more significant)
-#MODEL3 <- lm(RC_Native ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITESNOCATTAIL)
-#summary(MODEL3)
-#Anova(MODEL3, type =3)
-#AIC(MODEL3)
-#vif(MODEL3)
+#MODEL 2C:Native Richness
+MODEL2C <- lm(COM1_NRich ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
+summary(MODEL2C)
+Anova(MODEL2C)
+AIC(MODEL2C)
+vif(MODEL2C)
+plot(MODEL2C)
+visreg(MODEL2C, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL2C, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
-#MODEL 3 VISUALISATION 
-plot(MODEL3)
-visreg(MODEL3, points.par = list(pch = 16, cex = 1.2, col = "red"))
+###PAUSED HERE###
 
-#MODEL 4:Native Richness
-MODEL4 <- lm(COM1_ARich ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER*ARM_1 + PRCNT_EDGE + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
-summary(MODEL4)
-Anova(MODEL4)
-AIC(MODEL4)
-vif(MODEL4)
+###Research Question #3: Does marsh vegetation differ between compensation marshes and natural marshes? 
+
+
+#MODEL 3A:Invasive Dominance
+MODEL3A <- lm(RC_ ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRASERSITES)
+summary(MODEL3A)
+Anova(MODEL3A)
+AIC(MODEL3A)
+vif(MODEL3A)
+plot(MODEL3A)
+visreg(MODEL3A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL3A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
+plot()
+
+#MODEL 3A:Native Richness
+MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRASERSITES)
+summary(MODEL3A)
+Anova(MODEL3A)
+AIC(MODEL3A)
+vif(MODEL3A)
+plot(MODEL3A)
+visreg(MODEL3A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL3A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
+plot()
+
+
+#MODEL 3A:Native Richness
+MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRASERSITES)
+summary(MODEL3A)
+Anova(MODEL3A)
+AIC(MODEL3A)
+vif(MODEL3A)
+plot(MODEL3A)
+visreg(MODEL3A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot_model(MODEL3A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
+plot()
+
+
+
+
+
 
 #MODEL 4 VISUALISATION 
 plot(MODEL4)
