@@ -72,14 +72,14 @@ VegRelativeAbundance <- function(wideData, plantLists){
   u <- select(wideData, plantLists$unknown)
   total <- select(wideData, -plantLists$substrate)
   
-  n_ra <- mean(rowSums(n)/rowSums(total), na.rm = TRUE)
-  n_sd <- sd(rowSums(n)/rowSums(total), na.rm = TRUE)
-  e_ra <- mean(rowSums(e)/rowSums(total), na.rm = TRUE)
-  e_sd <- sd(rowSums(e)/rowSums(total), na.rm = TRUE)
-  i_ra <- mean(rowSums(i)/rowSums(total), na.rm =TRUE)
-  i_sd <- sd(rowSums(i)/rowSums(total), na.rm =TRUE)
-  u_ra <- mean(rowSums(u)/rowSums(total), na.rm = TRUE)
-  u_sd <- sd(rowSums(u)/rowSums(total), na.rm = TRUE)
+  n_ra <- mean(rowSums(n)/rowSums(total) * 100, na.rm = TRUE)
+  n_sd <- sd(rowSums(n)/rowSums(total) * 100, na.rm = TRUE)
+  e_ra <- mean(rowSums(e)/rowSums(total) * 100, na.rm = TRUE)
+  e_sd <- sd(rowSums(e)/rowSums(total) * 100, na.rm = TRUE)
+  i_ra <- mean(rowSums(i)/rowSums(total) * 100, na.rm =TRUE)
+  i_sd <- sd(rowSums(i)/rowSums(total) * 100, na.rm =TRUE)
+  u_ra <- mean(rowSums(u)/rowSums(total) * 100, na.rm = TRUE)
+  u_sd <- sd(rowSums(u)/rowSums(total) * 100, na.rm = TRUE)
   
   result <- data.frame(n_ra, n_sd,
                        e_ra, e_sd,
