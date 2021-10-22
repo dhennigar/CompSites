@@ -1,18 +1,19 @@
 # Analysis script for FRE Compensation Sites
 
-
 library(tidyverse)
-library(BiodiversityR)
+library(vegan)
+
+# load veg functions
 source("./Scripts/VegFunctions.R")
 
+# set file paths
 datapath <- "./FieldData/2021/"
 resultspath <- "./Results/2021/"
 year <- "2021"
-
 files <- list.files(datapath)
 
-ProjectResults <- data.frame()
 
+ProjectResults <- data.frame()
 for(i in 1:length(files)){
   # import each csv and transform to wide format
   # only community 1 (marsh) is considered
