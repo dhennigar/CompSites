@@ -1,29 +1,43 @@
 #Pie Charts for Site Descriptions
 
-# import libraries
+# Import Libraries --------------------------------------------------------
+
 library("ggplot2")
 library("tidyverse")
 library("scales")
 
-### IMPORT DATA ###
-# edit file paths as necessary
 
-# Compensation Site Data
-Comp <- read.csv("~/Documents/R/CompSites/Results/2021/09-003-results.csv", fileEncoding = "UTF-8-BOM")
+# Data Import -------------------------------------------------------------
 
-#Converting to Long Format for Chart Creation
-CompLong <- select(Comp,natives, exotics, invasives) 
-CompLong <-  gather(CompLong, Origin, Percent_Cover, natives:invasives, factor_key=TRUE)
-CompLong$Percent_Cover=CompLong$Percent_Cover*100
+# Set this value to your desired site:
+site_id <- "02-015"
 
-#pie chart
-chart1 <- ggplot(CompLong, aes(x="", y=Percent_Cover, fill = Origin)) +
-  geom_bar(width = 1, stat = "identity")
+# Load comp site data
+Comp <- read.csv("./Results/2021/VegDataResults_2021.csv", fileEncoding = "UTF-8-BOM") |>
+  subset(Site_ID == site_id)
+
+
+# Data Management ---------------------------------------------------------
+
+# convert to long-format for pie plotting the chart.
+CompLong <- Comp |>
+  select(c("n_ra", "e_ra", "i_ra", "u_ra")) |>
+  transmute(Native = n_ra, Exotic = e_ra, Invasive = i_ra, Unknown = u_ra) |>
+  gather(Origin, Percent_Cover, Native:Unknown, factor_key=TRUE) |>
+  arrange(-Percent_Cover) |>
+  mutate(Percent_Cover_cs = cumsum(Percent_Cover))
+
+
+# Create the figure -------------------------------------------------------
+
+# pie chart
+chart1 <- ggplot(CompLong, aes(x = "", y = Percent_Cover, fill = Origin)) +
+  geom_col()
 chart1
-piechart <- chart1 + coord_polar("y", start = 0)
+piechart <- chart1 + coord_polar("y", start = 0, direction = 1)
 piechart
 
-#Create Blank Theme
+# Create Blank Theme
 blank_theme <- theme_minimal()+
   theme(
     axis.title.x = element_blank(),
@@ -34,10 +48,11 @@ blank_theme <- theme_minimal()+
     plot.title=element_text(size=15, face="bold")
   )
 
-#Final version of pie chart with blank theme and blue, colour-blind-friendly theme
+# Final version of pie chart with blank theme and blue, colour-blind-friendly theme
 piechart + scale_fill_brewer("Blues") + blank_theme +
   theme(axis.text.x=element_blank(), 
         legend.title = element_blank(),
         legend.text= element_text(size=14))+
-  geom_text(aes(y = Percent_Cover/3 + c(0, cumsum(Percent_Cover)[-length(Percent_Cover)]), 
-                label = percent(Percent_Cover/100)), size=5)
+  geom_text(aes(x = 1, y = Percent_Cover_cs - Percent_Cover/2,
+                label = percent(Percent_Cover/100, accuracy = 0.1)),
+            position = position_dodge(width = 0.5), size = 5)
