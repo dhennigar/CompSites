@@ -28,28 +28,7 @@ VegLongToWide <- function(data){
 
 VegUniqueSpecies <- function(data){
   # returns lists of unique species of each origin type.
-  n <- data$SPECIES_CODE %>%
-    subset(data$ORIGIN == "N") %>%
-    unique()
-  
-  e <- data$SPECIES_CODE %>%
-    subset(data$ORIGIN == "E") %>%
-    unique()
-  
-  i <- data$SPECIES_CODE %>%
-    subset(data$ORIGIN == "I") %>%
-    unique()
-  
-  u <- data$SPECIES_CODE %>%
-    subset(data$ORIGIN == "U") %>%
-    unique()
-  
-  s <- data$SPECIES_CODE %>%
-    subset(data$ORIGIN == "S") %>%
-    unique()
-  
-  plants <- list(n, e, i, u, s)
-  names(plants) <- c("native", "exotic", "invasive", "unknown", "substrate")
+  plants <- tapply(data$SPECIES_CODE, data$ORIGIN, FUN = unique)
   return(plants)
 }
 
@@ -66,11 +45,11 @@ VegPercentCoverStats <- function(data){
 VegRelativeAbundance <- function(wideData, plantLists){
   # takes wide data and plants list and returns relative abundance stats.
   
-  n <- select(wideData, plantLists$native)
-  e <- select(wideData, plantLists$exotic)
-  i <- select(wideData, plantLists$invasive)
-  u <- select(wideData, plantLists$unknown)
-  total <- select(wideData, -plantLists$substrate)
+  n <- select(wideData, plantLists$N)
+  e <- select(wideData, plantLists$E)
+  i <- select(wideData, plantLists$I)
+  u <- select(wideData, plantLists$U)
+  total <- select(wideData, -plantLists$S)
   
   n_ra <- mean(rowSums(n)/rowSums(total) * 100, na.rm = TRUE)
   n_sd <- sd(rowSums(n)/rowSums(total) * 100, na.rm = TRUE)
@@ -94,26 +73,26 @@ VegStats <- function(longData, wideData, plantLists){
   lyngbyeMean <- mean(longData$MAX_LH_CM, na.rm = TRUE)
   lyngbyeSD <- sd(longData$MAX_LH_CM, na.rm = TRUE)
   
-  richnessMean <- mean(specnumber(select(wideData, -plantLists$substrate)))
-  richnessSD <- sd(specnumber(select(wideData, -plantLists$substrate)))
-  nativeRichnessMean <- mean(specnumber(select(wideData, -plantLists$native)))
-  nativeRichnessSD <- sd(specnumber(select(wideData, plantLists$native)))
+  richnessMean <- mean(specnumber(select(wideData, -plantLists$S)))
+  richnessSD <- sd(specnumber(select(wideData, -plantLists$S)))
+  NRichnessMean <- mean(specnumber(select(wideData, plantLists$N)))
+  NRichnessSD <- sd(specnumber(select(wideData, plantLists$N)))
   
-  if(length(plantLists$native) == 0){
+  if(length(plantLists$N) == 0){
     shannon <- NA
     shannonSD <- NA
     simpson <- NA
     simpsonSD <- NA
   } else {
-    shannon <- mean(diversity(select(wideData, plantLists$native), index = "shannon"))
-    shannonSD <- sd(diversity(select(wideData, plantLists$native), index = "shannon"))
-    simpson <- mean(diversity(select(wideData, plantLists$native), index = "simpson"))
-    simpsonSD <- sd(diversity(select(wideData, plantLists$native), index = "simpson"))
+    shannon <- mean(diversity(select(wideData, plantLists$N), index = "shannon"))
+    shannonSD <- sd(diversity(select(wideData, plantLists$N), index = "shannon"))
+    simpson <- mean(diversity(select(wideData, plantLists$N), index = "simpson"))
+    simpsonSD <- sd(diversity(select(wideData, plantLists$N), index = "simpson"))
   }
   
   result <- data.frame(lyngbyeMean, lyngbyeSD,
                        richnessMean, richnessSD,
-                       nativeRichnessMean, nativeRichnessSD,
+                       NRichnessMean, NRichnessSD,
                        shannon, shannonSD, simpson, simpsonSD)
   return(result)
 }
