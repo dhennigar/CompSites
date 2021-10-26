@@ -14,7 +14,8 @@ files <- list.files(datapath)
 
 
 ProjectResults <- data.frame()
-for(i in 1:length(files)){
+
+for (i in 1:length(files)) {
   # import each csv and transform to wide format
   # only community 1 (marsh) is considered
   vegLong <- VegImport(paste(datapath, files[i], sep = ""), year = year)
@@ -25,7 +26,7 @@ for(i in 1:length(files)){
   
   # veg percent cover summary stats
   pcStats <- VegPercentCoverStats(vegWide)
-  write.csv(pcStats, paste(resultspath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
+  # write.csv(pcStats, paste(resultspath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
   
   # site veg community statistics
   siteStats <- VegStats(vegLong, vegWide, plants)
@@ -36,11 +37,11 @@ for(i in 1:length(files)){
   ProjectResults <- rbind(ProjectResults, siteStats)
 }
 
-ProjectResults$Site_ID <- files |>
+ProjectResults$Site_ID <- files %>%
   str_remove(".csv")
 
-ProjectResults$RA_Sum <- ProjectResults |>
-  select(c("n_ra", "e_ra", "i_ra", "u_ra")) |>
+ProjectResults$RA_Sum <- ProjectResults %>%
+  select(c("n_ra", "e_ra", "i_ra", "u_ra")) %>%
   rowSums()
 
 write.csv(ProjectResults, paste(resultspath, "VegDataResults_", year, ".csv", sep = ""))

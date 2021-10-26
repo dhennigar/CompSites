@@ -18,8 +18,8 @@ VegImport <- function(filepath, year){
 
 VegLongToWide <- function(data){
   # convert veg data from long to wide format
-  wideData <- data |>
-    select(c(PLOT, SPECIES_CODE, PERCENT_COVER)) |>
+  wideData <- data %>%
+    select(c(PLOT, SPECIES_CODE, PERCENT_COVER)) %>%
     spread(SPECIES_CODE, PERCENT_COVER)
   wideData[is.na(wideData)] <- 0
   wideData <- wideData[-1]
@@ -28,24 +28,24 @@ VegLongToWide <- function(data){
 
 VegUniqueSpecies <- function(data){
   # returns lists of unique species of each origin type.
-  n <- data$SPECIES_CODE |>
-    subset(data$ORIGIN == "N") |>
+  n <- data$SPECIES_CODE %>%
+    subset(data$ORIGIN == "N") %>%
     unique()
   
-  e <- data$SPECIES_CODE |>
-    subset(data$ORIGIN == "E") |>
+  e <- data$SPECIES_CODE %>%
+    subset(data$ORIGIN == "E") %>%
     unique()
   
-  i <- data$SPECIES_CODE |>
-    subset(data$ORIGIN == "I") |>
+  i <- data$SPECIES_CODE %>%
+    subset(data$ORIGIN == "I") %>%
     unique()
   
-  u <- data$SPECIES_CODE |>
-    subset(data$ORIGIN == "U") |>
+  u <- data$SPECIES_CODE %>%
+    subset(data$ORIGIN == "U") %>%
     unique()
   
-  s <- data$SPECIES_CODE |>
-    subset(data$ORIGIN == "S") |>
+  s <- data$SPECIES_CODE %>%
+    subset(data$ORIGIN == "S") %>%
     unique()
   
   plants <- list(n, e, i, u, s)
