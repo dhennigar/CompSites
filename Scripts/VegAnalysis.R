@@ -24,17 +24,22 @@ for (i in 1:length(files)) {
   # unique species list for each origin, used in other calculations.
   plants <- VegUniqueSpecies(vegLong)
   
-  # veg percent cover summary stats
-  pcStats <- VegPercentCoverStats(vegWide)
-  # write.csv(pcStats, paste(resultspath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
-  
-  # site veg community statistics
-  siteStats <- VegStats(vegLong, vegWide, plants)
-  relativeAbundance <- VegRelativeAbundance(vegWide, plants)
-  siteStats <- c(siteStats, relativeAbundance)
-  
-  # add new row for each site
-  ProjectResults <- rbind(ProjectResults, siteStats)
+  if (length(plants) == 0){
+    siteStats <- rep(NA, times = 18)
+    ProjectResults <- rbind(ProjectResults, siteStats)
+  } else {
+      # veg percent cover summary stats
+      pcStats <- VegPercentCoverStats(vegWide)
+      write.csv(pcStats, paste(resultspath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
+      
+      # site veg community statistics
+      siteStats <- VegStats(vegLong, vegWide, plants)
+      relativeAbundance <- VegRelativeAbundance(vegWide, plants)
+      siteStats <- c(siteStats, relativeAbundance)
+      
+      # add new row for each site
+      ProjectResults <- rbind(ProjectResults, siteStats)
+  }
 }
 
 ProjectResults$Site_ID <- files %>%
