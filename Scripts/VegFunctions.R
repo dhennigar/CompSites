@@ -97,4 +97,19 @@ VegStats <- function(longData, wideData, plantLists){
   return(result)
 }
 
-
+logCover <- function(wideData){
+  if (any(names(wideData) == "WOOD" | "LOG")){
+    meanWoodyCover <- wideData %>% 
+      select(any(c(WOOD, LOG))) %>% 
+      rowSums() %>% 
+      mean(na.rm = TRUE)
+    sdWoodyCover <- wideData %>% 
+      select(any(c(WOOD, LOG))) %>% 
+      rowSums() %>% 
+      sd(na.rm = TRUE)
+  } else {
+    meanWoodyCover <- 0
+    sdWoodyCover <- 0
+  }
+  return(c(meanWoodyCover,sdWoodyCover))
+}
