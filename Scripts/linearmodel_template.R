@@ -27,6 +27,8 @@ MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv")
 #ensuring sampling year is categorical
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
 MASTERDATA$REFERENCE <- as.factor(MASTERDATA$REFERENCE)
+MASTERDATA$TYPE <- factor(MASTERDATA$TYPE, levels = c("Other", "Basin", "Embayment", "Inline", "Protruding"))
+
 #MASTERDATA$GRAZING <- as.factor(MASTERDATA$GRAZING)
 
 #Creating Fraser-only Subset
@@ -41,8 +43,8 @@ FRECOMPSITES <- FRASERSITES %>%
 FREREFSITES <- FRASERSITES %>%
   filter(REFERENCE == "YES") 
 
-FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
-  filter(TYPHA_PRES == "N")
+#FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
+ # filter(TYPHA_PRES == "N")
 
 ###EXPLANATORY MODELS
 
@@ -51,7 +53,7 @@ FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
 #MODEL 1A: Percent Marsh
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 
-MODEL1A <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM_1 + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+MODEL1A <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
 summary(MODEL1A)
 plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
 Anova(MODEL1A, type = 3)
@@ -64,7 +66,7 @@ visreg(MODEL1, points.par = list(pch = 16, cex = 1.2, col = "red"))
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 #Mudflat is not the inverse of vegetated marsh (log debris is the third category)
 
-MODEL1B <- lm(PRCNT_MUDFLAT ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM_1 + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+MODEL1B <- lm(PRCNT_MUDFLAT ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
 summary(MODEL1B)
 Anova(MODEL1B, type = 3)
 AIC(MODEL1B)
@@ -76,7 +78,7 @@ plot_model(MODEL1B, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
 #MODEL 1C: Percent Logs
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 #Mudflat is not the inverse of vegetated marsh (log debris is the third category)
-MODEL1C <- lm(PRCENT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM_1 + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+MODEL1C <- lm(PRCNT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
 summary(MODEL1C)
 Anova(MODEL1C, type = 3)
 vif(MODEL1C)
@@ -89,7 +91,7 @@ plot_model(MODEL1C, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
 
 #MODEL 2A:Invasive Dominance
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
-MODEL2A <- lm(RC_Invasive ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
+MODEL2A <- lm(RC_Invasive ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRECOMPSITES)
 summary(MODEL2A)
 Anova(MODEL2A, type =3)
 AIC(MODEL2A)
@@ -100,7 +102,7 @@ plot_model(MODEL2A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
 #MODEL 2B:Native Dominance
 #note that I ran a similar model with REF sites included (with age and a few comp site variables removed, and found similar results)
-MODEL2B <- lm(RC_Native ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
+MODEL2B <- lm(RC_Native ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRECOMPSITES)
 summary(MODEL2B)
 Anova(MODEL2B, type =3)
 AIC(MODEL2B)
@@ -110,7 +112,7 @@ visreg(MODEL2B, points.par = list(pch = 16, cex = 1.2, col = "red"))
 plot_model(MODEL2B, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
 #MODEL 2C:Native Richness
-MODEL2C <- lm(COM1_NRich ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
+MODEL2C <- lm(COM1_NRich ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM + DIST_UPRIVER), data = FRECOMPSITES)
 summary(MODEL2C)
 Anova(MODEL2C)
 AIC(MODEL2C)
@@ -125,7 +127,7 @@ plot_model(MODEL2C, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
 
 #MODEL 3A:Invasive Dominance
-MODEL3A <- lm(RC_ ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRASERSITES)
+MODEL3A <- lm(RC_native ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRASERSITES)
 summary(MODEL3A)
 Anova(MODEL3A)
 AIC(MODEL3A)
@@ -136,7 +138,7 @@ plot_model(MODEL3A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 plot()
 
 #MODEL 3A:Native Richness
-MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRASERSITES)
+MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRASERSITES)
 summary(MODEL3A)
 Anova(MODEL3A)
 AIC(MODEL3A)
