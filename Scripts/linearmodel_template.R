@@ -1,108 +1,166 @@
-#Loading Libraries
 library("ggplot2")
 library("tidyverse")
-library("reshape2")
-library("rstatix")
-library("lme4")
-library("lmerTest")
-library("fitdistrplus")
-library("ggpubr")
-library("emmeans")
 library("car")
-library("LMERConvenienceFunctions")
 library("visreg")
-library("MuMIn")
 library("robustHD")
-library("GGally")
-library("knitr")
-library("piecewiseSEM")
-library("cowplot")
 library("sjPlot")
 
+#dormant packages that may or may not be used
+#library("GGally")
+#library("knitr")
+#library("piecewiseSEM")
+#library("cowplot")
+#library("MuMIn")
+#library("LMERConvenienceFunctions")
+#library("reshape2")
+#library("rstatix")
+#library("lme4")
+#library("lmerTest")
+#library("fitdistrplus")
+#library("ggpubr")
+#library("emmeans")
+#Loading Libraries
 
-#NOTE: THIS IS A WORK IN PROGRESS
+
+#NOTE: THIS IS A WORK IN PROGRESS!!!
+
+
 #LOADING MASTER DATA .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv") 
 
-#ensuring sampling year is categorical
+#Ensuring Sample Year, Reference, and Project Type are factors, and ordering dummmy variables as prefered
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
 MASTERDATA$REFERENCE <- as.factor(MASTERDATA$REFERENCE)
 MASTERDATA$TYPE <- factor(MASTERDATA$TYPE, levels = c("Other", "Basin", "Embayment", "Inline", "Protruding"))
 
-#MASTERDATA$GRAZING <- as.factor(MASTERDATA$GRAZING)
 
-#Creating Fraser-only Subset
-FRASERSITES <- MASTERDATA %>%
+##Creating Subset Objects for Later Models 
+#All Fraser Only 
+FRECOMPSITES <- MASTERDATA %>%
   filter(RIVER == "Fraser") 
-  
-#Creating Fraser Compsite Subset (No REF Sites) 
-FRECOMPSITES <- FRASERSITES %>%
+#Fraser Comp Site Subset (No REF Sites) 
+FRECOMPSITES <- FRECOMPSITES %>%
   filter(REFERENCE == "NO") 
-
-#Creating Ref Site Subset (No Comp Sites)
-FREREFSITES <- FRASERSITES %>%
+#Fraser Ref Site Subset (No Comp Sites)
+FREREFSITES <- FRECOMPSITES %>%
   filter(REFERENCE == "YES") 
+#Cattail-free sites
+FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
+  filter(TYPHA_PRES == "N")
 
-#FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
- # filter(TYPHA_PRES == "N")
 
-###EXPLANATORY MODELS
+#standardize continuous variables to be centered on the mean (mean becomes 0) using the standardize function from robustHD  
+FRECOMPSITES$ELEV_MEANs <-standardize(FRECOMPSITES$ELEV_MEAN, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$DIST_UPRIVERs <-standardize(FRECOMPSITES$DIST_UPRIVER, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$PRCNT_EDGEs <-standardize(FRECOMPSITES$PRCNT_EDGE, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$AREA_MAPPEDs <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$AGEs <-standardize(FRECOMPSITES$AGE, centerFun = mean, scaleFun = sd)
 
-###Research Question #1: What factors affect marshes being vegetated?
+
+
+
+###EXPLANATORY MODELLIN
+
+###RESEARCH QUESTION #1: What factors affect marshes being vegetated?
 
 #MODEL 1A: Percent Marsh
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
+MODEL1A <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGEs + AREA_MAPPEDs + DIST_UPRIVERs + ARM + PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES,na.action = na.exclude)
 
-MODEL1A <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+#RESULTS
 summary(MODEL1A)
-plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
-Anova(MODEL1A, type = 3)
 
+#VISUALIZING DIAGNOSTICS
+#plotting the interaction effect
+plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
+#plotting model
+plot(MODEL1A)
+#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
+visreg(MODEL1A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
+#OTHER DIAGNOSTICS
+#Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
+#none above 5, so no concerns (James et al. 2014)
 vif(MODEL1A)
-plot(MODEL1)
-visreg(MODEL1, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
 #MODEL 1B: Percent Mudflat
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 #Mudflat is not the inverse of vegetated marsh (log debris is the third category)
 
 MODEL1B <- lm(PRCNT_MUDFLAT ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+
+#RESULTS
 summary(MODEL1B)
-Anova(MODEL1B, type = 3)
-AIC(MODEL1B)
-vif(MODEL1B)
-plot(MODEL1B)
-visreg(MODEL1B, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
+#VISUALIZING DIAGNOSTICS
+#plotting the interaction effect
 plot_model(MODEL1B, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
+#plotting model
+plot(MODEL1B)
+#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
+visreg(MODEL1B, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
-#MODEL 1C: Percent Logs
+#OTHER DIAGNOSTICS
+#Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
+#none above 5, so no concerns (James et al. 2014)
+vif(MODEL1B)
+
+#MODEL 1C: Percent Log
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
-#Mudflat is not the inverse of vegetated marsh (log debris is the third category)
-MODEL1C <- lm(PRCNT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
+
+MODEL1C <- lm(PRCNT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGEs + AREA_MAPPEDs + DIST_UPRIVERs + ARM + PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES,na.action = na.exclude)
+
+#RESULTS
 summary(MODEL1C)
-Anova(MODEL1C, type = 3)
-vif(MODEL1C)
-plot(MODEL1C)
-visreg(MODEL1C, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
+#VISUALIZING DIAGNOSTICS
+#plotting the interaction effect
 plot_model(MODEL1C, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
+#plotting model
+plot(MODEL1C)
+#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
+visreg(MODEL1C, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
+#OTHER DIAGNOSTICS
+#Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
+#none above 5, so no concerns (James et al. 2014)
+vif(MODEL1C)
 
 
-###Research Question #2: What factors affect the health of existing marshes?
+
+###TIDYING PAUSED HERE 10-28-2021
+
+
+
+###RESEARCH QUESTION #2: What factors affect the health of existing marshes?
 
 #MODEL 2A:Invasive Dominance
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
-MODEL2A <- lm(RC_Invasive ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRECOMPSITES)
+#elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
+#arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
+
+# Formula for same model, sans cattail-present sites 
+MODEL2A <- lm(RC_Invasive ~ (AGEs + SAMPLE_YEAR + AREA_MAPPEDs + ELEV_MEANs*DIST_UPRIVERs + ARM*DIST_UPRIVERs + GRAZING + ARM), data = FRECOMPSITES)
+
+#RESULTS
 summary(MODEL2A)
-Anova(MODEL2A, type =3)
-AIC(MODEL2A)
 vif(MODEL2A)
 plot(MODEL2A)
+
 visreg(MODEL2A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+
 plot_model(MODEL2A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
+
+
+#it appears as thought Typha-invaded sites are bucking the trend of invasive species becoming more dominant upriver
+#the following plot shows how Typha-present sites fair
+ggplot(FRECOMPSITES, aes(x=DIST_UPRIVER, y=RC_Invasive, color=TYPHA_PRES)) + 
+  geom_point() +
+  geom_smooth(method=lm)
 
 #MODEL 2B:Native Dominance
 #note that I ran a similar model with REF sites included (with age and a few comp site variables removed, and found similar results)
-MODEL2B <- lm(RC_Native ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRECOMPSITES)
+MODEL2B <- lm(RC_Native ~ (AGEs + SAMPLE_YEAR + AREA_MAPPEDs + ELEV_MEANs*DIST_UPRIVERs + ARM*DIST_UPRIVERs + GRAZING + ARM), data = FRECOMPSITES)
 summary(MODEL2B)
 Anova(MODEL2B, type =3)
 AIC(MODEL2B)
@@ -112,14 +170,14 @@ visreg(MODEL2B, points.par = list(pch = 16, cex = 1.2, col = "red"))
 plot_model(MODEL2B, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
 #MODEL 2C:Native Richness
-MODEL2C <- lm(COM1_NRich ~ (AGE + SAMPLE_YEAR + AREA_MAPPED + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM + DIST_UPRIVER), data = FRECOMPSITES)
+MODEL2C <- lm(COM1_NRich ~ (AGEs + SAMPLE_YEAR + AREA_MAPPEDs + ELEV_MEANs*DIST_UPRIVERs + ARM*DIST_UPRIVERs + GRAZING + ARM), data = FRECOMPSITES)
 summary(MODEL2C)
 Anova(MODEL2C)
 AIC(MODEL2C)
 vif(MODEL2C)
 plot(MODEL2C)
 visreg(MODEL2C, points.par = list(pch = 16, cex = 1.2, col = "red"))
-plot_model(MODEL2C, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
+plot_model(MODEL2C, type = "pred", terms = c("DIST_UPRIVERs", "ELEV_MEANs"))
 
 ###PAUSED HERE###
 
@@ -127,7 +185,7 @@ plot_model(MODEL2C, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 
 
 #MODEL 3A:Invasive Dominance
-MODEL3A <- lm(RC_native ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRASERSITES)
+MODEL3A <- lm(RC_native ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRECOMPSITES)
 summary(MODEL3A)
 Anova(MODEL3A)
 AIC(MODEL3A)
@@ -138,7 +196,7 @@ plot_model(MODEL3A, type = "pred", terms = c("DIST_UPRIVER", "ELEV_MEAN"))
 plot()
 
 #MODEL 3A:Native Richness
-MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRASERSITES)
+MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM*DIST_UPRIVER), data = FRECOMPSITES)
 summary(MODEL3A)
 Anova(MODEL3A)
 AIC(MODEL3A)
@@ -150,7 +208,7 @@ plot()
 
 
 #MODEL 3A:Native Richness
-MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRASERSITES)
+MODEL3A <- lm(COM1_ARich ~ (REFERENCE + ELEV_MEAN*DIST_UPRIVER + GRAZING + ARM_1*DIST_UPRIVER), data = FRECOMPSITES)
 summary(MODEL3A)
 Anova(MODEL3A)
 AIC(MODEL3A)
