@@ -5,20 +5,22 @@ library("visreg")
 library("robustHD")
 library("sjPlot")
 
+
+library("lme4")
 #dormant packages that may or may not be used
-#library("GGally")
-#library("knitr")
-#library("piecewiseSEM")
-#library("cowplot")
-#library("MuMIn")
-#library("LMERConvenienceFunctions")
-#library("reshape2")
-#library("rstatix")
-#library("lme4")
-#library("lmerTest")
-#library("fitdistrplus")
-#library("ggpubr")
-#library("emmeans")
+library("GGally")
+library("knitr")
+library("piecewiseSEM")
+library("cowplot")
+library("MuMIn")
+library("LMERConvenienceFunctions")
+library("reshape2")
+library("rstatix")
+
+library("lmerTest")
+library("fitdistrplus")
+library("ggpubr")
+library("emmeans")
 #Loading Libraries
 
 
@@ -36,15 +38,15 @@ MASTERDATA$TYPE <- factor(MASTERDATA$TYPE, levels = c("Other", "Basin", "Embayme
 
 ##Creating Subset Objects for Later Models 
 #All Fraser Only 
-FRECOMPSITES <- MASTERDATA %>%
+FRESITES <- MASTERDATA %>%
   filter(RIVER == "Fraser") 
 #Fraser Comp Site Subset (No REF Sites) 
-FRECOMPSITES <- FRECOMPSITES %>%
+FRECOMPSITES <- FRESITES %>%
   filter(REFERENCE == "NO") 
 #Fraser Ref Site Subset (No Comp Sites)
-FREREFSITES <- FRECOMPSITES %>%
+FREREFSITES <- FRESITES %>%
   filter(REFERENCE == "YES") 
-#Cattail-free sites
+#Cattail-free Comp sites
 FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
   filter(TYPHA_PRES == "N")
 
@@ -55,76 +57,6 @@ FRECOMPSITES$DIST_UPRIVERs <-standardize(FRECOMPSITES$DIST_UPRIVER, centerFun = 
 FRECOMPSITES$PRCNT_EDGEs <-standardize(FRECOMPSITES$PRCNT_EDGE, centerFun = mean, scaleFun = sd)
 FRECOMPSITES$AREA_MAPPEDs <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
 FRECOMPSITES$AGEs <-standardize(FRECOMPSITES$AGE, centerFun = mean, scaleFun = sd)
-
-
-
-
-###EXPLANATORY MODELLIN
-
-###RESEARCH QUESTION #1: What factors affect marshes being vegetated?
-
-#MODEL 1A: Percent Marsh
-#Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
-MODEL1A <- lm(PRCNT_MARSH ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGEs + AREA_MAPPEDs + DIST_UPRIVERs + ARM + PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES,na.action = na.exclude)
-
-#RESULTS
-summary(MODEL1A)
-
-#VISUALIZING DIAGNOSTICS
-#plotting the interaction effect
-plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
-#plotting model
-plot(MODEL1A)
-#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL1A, points.par = list(pch = 16, cex = 1.2, col = "red"))
-
-#OTHER DIAGNOSTICS
-#Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
-#none above 5, so no concerns (James et al. 2014)
-vif(MODEL1A)
-
-#MODEL 1B: Percent Mudflat
-#Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
-#Mudflat is not the inverse of vegetated marsh (log debris is the third category)
-
-MODEL1B <- lm(PRCNT_MUDFLAT ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES,na.action = na.exclude)
-
-#RESULTS
-summary(MODEL1B)
-
-#VISUALIZING DIAGNOSTICS
-#plotting the interaction effect
-plot_model(MODEL1B, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
-#plotting model
-plot(MODEL1B)
-#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL1B, points.par = list(pch = 16, cex = 1.2, col = "red"))
-
-#OTHER DIAGNOSTICS
-#Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
-#none above 5, so no concerns (James et al. 2014)
-vif(MODEL1B)
-
-#MODEL 1C: Percent Log
-#Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
-
-MODEL1C <- lm(PRCNT_LOG2 ~ (TYPE + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGEs + AREA_MAPPEDs + DIST_UPRIVERs + ARM + PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES,na.action = na.exclude)
-
-#RESULTS
-summary(MODEL1C)
-
-#VISUALIZING DIAGNOSTICS
-#plotting the interaction effect
-plot_model(MODEL1C, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
-#plotting model
-plot(MODEL1C)
-#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL1C, points.par = list(pch = 16, cex = 1.2, col = "red"))
-
-#OTHER DIAGNOSTICS
-#Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
-#none above 5, so no concerns (James et al. 2014)
-vif(MODEL1C)
 
 
 
@@ -256,7 +188,7 @@ visreg(MODEL7, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
 ##Research Question #1: What factors affect marshes being vegetated?
 #MODEL 1: Percent Marsh
-MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM + DIST_UPRIVER + GRAZING + ELEV_MEAN), data = FRECOMPSITES)
 
 ###Evaluating multicolinearity using VIF
 #All VIF values are <4, therefore colinearity does not appear to be an issue among variables
@@ -277,9 +209,9 @@ ELEVATION <- FRECOMPSITES$ELEV_MEAN
 sitecovar<- cbind.data.frame(SAMPLE_YEAR,TYPE, SHEAR_BOOM, OFFSHORE_STRUCTURE, AGE, AREA, ARM, DISTANCE_UPRIVER, GRAZING, ELEVATION)
 ggpairs(data = na.omit(sitecovar), title = "Pearson Correlation plot for all variables")
 
-
+options(na.action = na.fail)
 #model selection
-MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM_1 + DIST_UPRIVER + GRAZING + ELEV_MEAN), data = FRECOMPSITES,na.action = "na.fail")
+MODEL1 <- lm(PRCNT_MARSH ~ (TYPE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + ARM + DIST_UPRIVER + ELEV_MEAN), data = FRECOMPSITES)
 summary(MODEL1) #AIC 746.4772
 AIC(MODEL1)
 
@@ -531,6 +463,7 @@ summary(JULYRAMETMODEL)
 
 
 ###CONTINUED
+
 
 
 
