@@ -143,3 +143,4 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 plot_model(MODEL1B_ALL, show.values = TRUE, value.offset = .3)
 #plotting the interaction effect
 MODEL1B2 <- plot_model(MODEL1B, type = "int", terms = c("PRCNT_EDGEs", "ELEV_MEANs"))
+
