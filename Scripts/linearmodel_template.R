@@ -23,7 +23,6 @@ library("sjPlot")
 #NOTE: THIS IS A WORK IN PROGRESS
 #LOADING MASTER DATA .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv") 
-# MASTERDATA <- read.csv("./FieldData/SiteData_Master.csv") # relative path
 
 #ensuring sampling year is categorical
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
@@ -58,8 +57,8 @@ plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGE", "ELEV_MEAN"))
 Anova(MODEL1A, type = 3)
 
 vif(MODEL1A)
-plot(MODEL1A)
-visreg(MODEL1A, points.par = list(pch = 16, cex = 1.2, col = "red"))
+plot(MODEL1)
+visreg(MODEL1, points.par = list(pch = 16, cex = 1.2, col = "red"))
 
 #MODEL 1B: Percent Mudflat
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
