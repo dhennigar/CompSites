@@ -9,7 +9,7 @@ library(vegan)
 
 # global variables --------------------------------------------------------
 
-year = "2021" # SET THIS VARIABLE MANUALLY
+year = "2015" # SET THIS VARIABLE MANUALLY
 
 if (year == "2021"){
   datapath <- "./FieldData/2021/"
@@ -33,12 +33,13 @@ veg_import <- function(filepath, year){
   df <- read.csv(filepath, fileEncoding = "UTF-8-BOM") 
   
   # fix bugs in 2015 data import
-  if(year == "2015"){
+  if (year == "2015") {
     df <- df[1:8] %>% 
       mutate(Site_Number = SITE_ID) %>% 
       select(-SITE_ID)
   }
   
+  # create PLOT_CODE column for unique plot identifiers. Filter out Riparian.
   df <- df %>% 
     mutate(PERCENT_COVER = as.numeric(PERCENT_COVER),
            PLOT_CODE = paste(Site_Number, COMMUNITY, PLOT, sep = "-")) %>% 
@@ -181,5 +182,15 @@ for(i in 1:length(files)){
 
 # clean up and export -----------------------------------------------------
 
-#write.csv(project_results,
-#          paste(resultpath, "plot_results", year, ".csv", sep = ""))
+# fix some inconsistent plot naming and issue where plot codes were converted to dates
+if (year == 2015) {
+  project_results$PLOT_CODE <- project_results$PLOT_CODE %>% 
+    str_remove_all("-Mar") %>% 
+    str_remove_all("-Feb") %>% 
+    str_remove_all("-Jan") %>% 
+    str_replace("-2-2-", "-2-") %>% 
+    str_replace("-1-1-", "-1-")
+}
+
+write.csv(project_results,
+          paste(resultpath, "plot_results", year, ".csv", sep = ""))
