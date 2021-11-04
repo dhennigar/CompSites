@@ -9,7 +9,7 @@ library(vegan)
 
 # global variables --------------------------------------------------------
 
-year = "2015" # SET THIS VARIABLE MANUALLY
+year = "2021" # SET THIS VARIABLE MANUALLY
 
 if (year == "2021"){
   datapath <- "./FieldData/2021/"
@@ -42,7 +42,7 @@ veg_import <- function(filepath, year){
   df <- df %>% 
     mutate(PERCENT_COVER = as.numeric(PERCENT_COVER),
            PLOT_CODE = paste(Site_Number, COMMUNITY, PLOT, sep = "-")) %>% 
-    filter(ORIGIN != "S" & COMMUNITY != "RIP")
+    filter(COMMUNITY != "RIP")
   
   return(df)
 }
@@ -109,6 +109,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$N) %>% 
     rowSums() / longData %>%
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   exotic_ra <- longData %>% 
@@ -116,6 +117,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$E) %>% 
     rowSums() / longData %>%
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   invasive_ra <- longData %>% 
@@ -123,6 +125,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$I) %>% 
     rowSums() / longData %>% 
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   unknown_ra <- longData %>% 
@@ -130,6 +133,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$U) %>% 
     rowSums() / longData %>%
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   return(data.frame(native_ra,
@@ -177,5 +181,5 @@ for(i in 1:length(files)){
 
 # clean up and export -----------------------------------------------------
 
-# write.csv(project_results,
-# ▀          paste(resultpath, "plot_results", year, ".csv", sep = ""))
+#write.csv(project_results,
+#          paste(resultpath, "plot_results", year, ".csv", sep = ""))
