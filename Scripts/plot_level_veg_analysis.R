@@ -33,16 +33,17 @@ veg_import <- function(filepath, year){
   df <- read.csv(filepath, fileEncoding = "UTF-8-BOM") 
   
   # fix bugs in 2015 data import
-  if(year == "2015"){
+  if (year == "2015") {
     df <- df[1:8] %>% 
       mutate(Site_Number = SITE_ID) %>% 
       select(-SITE_ID)
   }
   
+  # create PLOT_CODE column for unique plot identifiers. Filter out Riparian.
   df <- df %>% 
     mutate(PERCENT_COVER = as.numeric(PERCENT_COVER),
            PLOT_CODE = paste(Site_Number, COMMUNITY, PLOT, sep = "-")) %>% 
-    filter(ORIGIN != "S" & COMMUNITY != "RIP")
+    filter(COMMUNITY != "RIP")
   
   return(df)
 }
@@ -109,6 +110,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$N) %>% 
     rowSums() / longData %>%
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   exotic_ra <- longData %>% 
@@ -116,6 +118,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$E) %>% 
     rowSums() / longData %>%
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   invasive_ra <- longData %>% 
@@ -123,6 +126,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$I) %>% 
     rowSums() / longData %>% 
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   unknown_ra <- longData %>% 
@@ -130,6 +134,7 @@ veg_rel_abundance <- function(longData, plantList){
     select(plantList$U) %>% 
     rowSums() / longData %>%
     veg_long_to_wide() %>%
+    select(-plantList$S) %>% 
     rowSums()
   
   return(data.frame(native_ra,
@@ -177,5 +182,15 @@ for(i in 1:length(files)){
 
 # clean up and export -----------------------------------------------------
 
-# write.csv(project_results,
-# ▀          paste(resultpath, "plot_results", year, ".csv", sep = ""))
+# fix some inconsistent plot naming and issue where plot codes were converted to dates
+if (year == 2015) {
+  project_results$PLOT_CODE <- project_results$PLOT_CODE %>% 
+    str_remove_all("-Mar") %>% 
+    str_remove_all("-Feb") %>% 
+    str_remove_all("-Jan") %>% 
+    str_replace("-2-2-", "-2-") %>% 
+    str_replace("-1-1-", "-1-")
+}
+
+write.csv(project_results,
+          paste(resultpath, "plot_results", year, ".csv", sep = ""))
