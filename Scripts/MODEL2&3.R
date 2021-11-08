@@ -58,21 +58,19 @@ FRECOMPSITES$PRCNT_EDGEs <-standardize(FRECOMPSITES$PRCNT_EDGE, centerFun = mean
 FRECOMPSITES$AREA_MAPPEDs <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
 FRECOMPSITES$AGEs <-standardize(FRECOMPSITES$AGE, centerFun = mean, scaleFun = sd)
 
-
-
-###TIDYING PAUSED HERE 10-28-2021
-
-
-
 ###RESEARCH QUESTION #2: What factors affect the health of existing marshes?
 
 #MODEL 2A:Invasive Dominance
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
-
 # Formula for same model, sans cattail-present sites 
-MODEL2A <- lm(RC_Invasive ~ (AGEs + SAMPLE_YEAR + AREA_MAPPEDs + ELEV_MEANs*DIST_UPRIVERs + ARM*DIST_UPRIVERs + GRAZING + ARM), data = FRECOMPSITES)
+MODEL2A <- lmer((RC_Invasive~SAMPLING_AGE+ARM+DIST_UPRIVER+GRAZING+ELEVATION+PROX_CHAN +(1|SAMPLE_YEAR) + (1|SITE), data = )
+
+                
+                
+                
+RE: SITE, SAMPLE_YEAR
 
 #RESULTS
 summary(MODEL2A)

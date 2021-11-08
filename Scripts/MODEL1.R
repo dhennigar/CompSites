@@ -93,8 +93,15 @@ M1.5 <-ggplot(FRECOMPSITES, aes(x=OFFSHORE_STRUCTURE,y=PRCNT_MARSH)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
+#log fence
+M1.6 <- ggplot(FRECOMPSITES, aes(x=LOG_FENCE,y=PRCNT_MARSH)) +
+  geom_boxplot() +
+  geom_jitter()+
+  labs(x ="Log Fence", y = "% Vegetated") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
 #river arm 
-M1.6 <- ggplot(FRECOMPSITES, aes(x=ARM,y=PRCNT_MARSH)) +
+M1.7 <- ggplot(FRECOMPSITES, aes(x=ARM,y=PRCNT_MARSH)) +
   geom_boxplot() +
   geom_jitter()+
   labs(x ="River Arm", y = "% Vegetated") +
@@ -113,12 +120,13 @@ FRECOMPSITES$ELEV_MEAN3group <-
             x < mean(x)-sd(x) ~ "low")
 
 count(FRECOMPSITES,FRECOMPSITES$ELEV_MEAN3group)
+FRECOMPSITES$ELEV_MEAN3group <- factor(FRECOMPSITES$ELEV_MEAN3group, levels = c("high", "average", "setosa"))
 
 #plot
-M1.7 <- FRECOMPSITES %>%
+M1.8 <- FRECOMPSITES %>%
 ggplot() +
   aes(x = PRCNT_EDGE, y = PRCNT_MARSH, group = ELEV_MEAN3group, color = ELEV_MEAN3group) +
-  geom_point(color = "black", alpha = .7) +
+  geom_point(alpha = .7) +
   ylim(0,100) +
   geom_smooth(method = "lm") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -126,10 +134,10 @@ ggplot() +
   labs(x ="% Edge Habitat", y = "% Vegetated", color = "Elevation") 
 
 #dummy plot for legend 
-M1.7L <- FRECOMPSITES %>%
+M1.8L <- FRECOMPSITES %>%
   ggplot() +
   aes(x = PRCNT_EDGE, y = PRCNT_MARSH, group = ELEV_MEAN3group, color = ELEV_MEAN3group) +
-  geom_point(color = "black", alpha = .7) +
+  geom_point(alpha = .7) +
   ylim(0,100) +
   geom_smooth(method = "lm") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -138,13 +146,13 @@ M1.7L <- FRECOMPSITES %>%
   labs(x ="% Edge Habitat", y = "% Vegetated", color = "Elevation") 
 
 #legend: note that margin order is "top", "right", "bottom", "left"
-M1.7Legend <- get_legend(M1.7L +
-                           theme(legend.box.margin = margin(-35,0,0,-90))) 
+M1.8Legend <- get_legend(M1.8L +
+                           theme(legend.box.margin = margin(-50,0,0,-100))) 
 
 #creation of panel figure for paper! 
 M1TopRow <- plot_grid(M1.1, M1.2, M1.3, align = "h", axis = "l", ncol =3)
 M1MidRow <- plot_grid(M1.4, M1.5, M1.6, align = "h", axis = "l", ncol =3)
-M1BotRow <- plot_grid("",M1.7,M1.7Legend, align = "h", axis = "l", ncol =3)
+M1BotRow <- plot_grid(M1.7,M1.8,M1.8Legend, align = "h", axis = "l", ncol =3)
 
 plot_grid(M1TopRow , M1MidRow, M1BotRow, ncol = 1, align = "h")
 
@@ -155,7 +163,7 @@ plot_grid(M1TopRow , M1MidRow, M1BotRow, ncol = 1, align = "h")
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 
 #Experimenting with all covariates (MODEL1A), and only covariates that had simple linear regression p values of <.20 (MODEL1B)
-MODEL1A_ALL <- lm(PRCNT_MARSH ~ (LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + SAMPLING_AGEs + AREA_MAPPEDs + DIST_UPRIVERs + ARM + PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES)
+MODEL1A_ALL <- lm(PRCNT_MARSH ~ (LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGEs + AREA_MAPPEDs + DIST_UPRIVERs + ARM + PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES)
 MODEL1A_SMALL <- lm(PRCNT_MARSH ~ (LOG_FENCE + OFFSHORE_STRUCTURE+ PRCNT_EDGEs*ELEV_MEANs), data = FRECOMPSITES)
 
 #comparing model performance using AIC: full model is the better fit 
@@ -190,7 +198,8 @@ visreg(MODEL1A_ALL,"PRCNT_EDGEs", by = "ELEV_MEANs", overlay=TRUE,partial = FALS
 #COEFFICIENT PLOT
 set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
-plot_model(MODEL1A_ALL, show.values = TRUE, value.offset = .3)
+names(MODEL1A_ALL$coefficients) <- c('Intercept','Log Fence Present','Shear Boom','Offshore Structure', 'Age', 'Size','Distance Upriver', 'North Arm', '% Edge', 'Mean Elevation', '% Edge:Mean Elevation')
+plot_model(MODEL1A_ALL, show.values = TRUE, value.offset = .3, title = "% Vegetated Marsh", ci.lvl = .95,sort.est = TRUE)
 #plotting the interaction effect
 MODEL1A2 <- plot_model(MODEL1A, type = "int", terms = c("PRCNT_EDGEs", "ELEV_MEANs"))
 
