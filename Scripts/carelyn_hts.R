@@ -10,16 +10,18 @@ library(tidyverse)
 
 year = "2015" # SET THIS VARIABLE MANUALLY
 
+# set file path for FielData based on year
 if (year == "2021"){
   datapath <- "./FieldData/2021/"
 }
-
 if (year == "2015"){
   datapath <- "./FieldData/2015/csv/"
 }
 
+# list all the site data.
 files <- list.files(datapath)
 
+# set path for the final results
 resultpath <-  paste("./Results/", year, "/", sep = "")
 
 carelyn_results <- data.frame()
@@ -29,22 +31,23 @@ carelyn_results <- data.frame()
 
 read_data <- function(filepath){
   read.csv(filepath, fileEncoding = "UTF-8-BOM") %>% 
-    {if (year == "2015"){
+    {if (year == "2015"){ # fix 2015 naming discrepancies
       mutate(., MAX_LH_CM = MAX_LH, Site_Number = SITE_ID)
     }} %>% 
-    filter(COMMUNITY != "RIP") %>% 
-    mutate(PLOT_CODE = paste(Site_Number, COMMUNITY, PLOT, sep = "-")) %>% 
+    filter(COMMUNITY != "RIP") %>% # no riparian 
+    mutate(PLOT_CODE = paste(Site_Number, COMMUNITY, PLOT, sep = "-")) %>%  # unique plot codes
     select(c(PLOT_CODE, MAX_LH_CM))
 }
 
 
 carelyn_analysis <- function(data){
+  # join list of max-sedge-height data to list of unique plot codes.
   carelyn <- right_join(filter(data, !is.na(data$MAX_LH_CM)),
            data.frame(PLOT_CODE = data$PLOT_CODE %>% unique()),
            by = 'PLOT_CODE',
            all = TRUE)
 
-  carelyn <- carelyn[order(carelyn$PLOT_CODE),]
+  carelyn <- carelyn[order(carelyn$PLOT_CODE),] # ordered by plot code
   
   return(carelyn)
 }
