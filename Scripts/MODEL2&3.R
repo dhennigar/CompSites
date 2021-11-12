@@ -28,11 +28,12 @@ library("emmeans")
 
 
 #LOADING MASTER DATA .CSV 
-MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv") 
+MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODEL2_DATA.csv") 
 
 #Ensuring Sample Year, Reference, and Project Type are factors, and ordering dummy variables as preferred
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
 MASTERDATA$REFERENCE <- as.factor(MASTERDATA$REFERENCE)
+MASTERDATA$SITE <- as.factor(MASTERDATA$SITE)
 MASTERDATA$TYPE <- factor(MASTERDATA$TYPE, levels = c("Other", "Basin", "Embayment", "Inline", "Protruding"))
 
 
@@ -46,17 +47,14 @@ FRECOMPSITES <- FRESITES %>%
 #Fraser Ref Site Subset (No Comp Sites)
 FREREFSITES <- FRESITES %>%
   filter(REFERENCE == "YES") 
-#Cattail-free Comp sites
-FRECOMPSITESNOCATTAIL <- FRECOMPSITES %>%
-  filter(TYPHA_PRES == "N")
-
 
 #standardize continuous variables to be centered on the mean (mean becomes 0) using the standardize function from robustHD  
-FRECOMPSITES$ELEV_MEANs <-standardize(FRECOMPSITES$ELEV_MEAN, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$DIST_UPRIVERs <-standardize(FRECOMPSITES$DIST_UPRIVER, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$PRCNT_EDGEs <-standardize(FRECOMPSITES$PRCNT_EDGE, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$AREA_MAPPEDs <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$AGEs <-standardize(FRECOMPSITES$AGE, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$SAMPLING_AGE <-standardize(FRECOMPSITES$SAMPLING_AGE, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$AREA_MAPPED <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$KM_UPRIVER <-standardize(FRECOMPSITES$KM_UPRIVER, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$ELEVATION <-standardize(FRECOMPSITES$ELEVATION, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$PROX_CHAN <-standardize(FRECOMPSITES$PROX_CHAN, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$CARELYN_MH <-standardize(FRECOMPSITES$CARELYN_MH, centerFun = mean, scaleFun = sd)
 
 ###RESEARCH QUESTION #2: What factors affect the health of existing marshes?
 
@@ -65,9 +63,22 @@ FRECOMPSITES$AGEs <-standardize(FRECOMPSITES$AGE, centerFun = mean, scaleFun = s
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
-MODEL2A <- lmer((RC_Invasive~SAMPLING_AGE+ARM+DIST_UPRIVER+GRAZING+ELEVATION+PROX_CHAN +(1|SAMPLE_YEAR) + (1|SITE), data = )
+MODEL2A <- lmer(RC_Invasive~(SAMPLING_AGE+ARM+KM_UPRIVER*ELEVATION+PROX_CHAN) + (1|SITE),data =FRECOMPSITES)
+summary(MODEL2A)
+Anova(MODEL2A)
+AIC(MODEL2A)
 
-                
+
+visreg(MODEL2A)
+
+
+
+MODEL2A <- lmer(RC_Invasive~(SAMPLING_AGE+ARM+KM_UPRIVER+ELEVATION+PROX_CHAN) + (1|SAMPLE_YEAR) + (1|SITE),data =FRECOMPSITES)
+
+
+glmer(1+RAMETS ~ (TREATMENTCODE+YEAR+ELEVATION)^3 + (1|PLOT), data = AUGUSTDATA,
+      family=poisson(link="log"))
+
                 
                 
 RE: SITE, SAMPLE_YEAR
