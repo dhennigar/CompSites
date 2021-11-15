@@ -4,10 +4,7 @@ library("car")
 library("visreg")
 library("robustHD")
 library("sjPlot")
-
-
 library("lme4")
-#dormant packages that may or may not be used
 library("GGally")
 library("knitr")
 library("piecewiseSEM")
@@ -16,7 +13,6 @@ library("MuMIn")
 library("LMERConvenienceFunctions")
 library("reshape2")
 library("rstatix")
-
 library("lmerTest")
 library("fitdistrplus")
 library("ggpubr")
@@ -28,14 +24,15 @@ library("emmeans")
 
 
 #LOADING MASTER DATA .CSV 
-MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODEL2_DATA.csv") 
+MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODEL2_DATACLEAN.csv") 
 
 #Ensuring Sample Year, Reference, and Project Type are factors, and ordering dummy variables as preferred
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
 MASTERDATA$REFERENCE <- as.factor(MASTERDATA$REFERENCE)
 MASTERDATA$SITE <- as.factor(MASTERDATA$SITE)
+MASTERDATA$ELEAVATION <- as.numeric(MASTERDATA$ELEVATION)
+MASTERDATA$RC_Invasive <- as.numeric(MASTERDATA$RC_Invasive)
 MASTERDATA$TYPE <- factor(MASTERDATA$TYPE, levels = c("Other", "Basin", "Embayment", "Inline", "Protruding"))
-
 
 ##Creating Subset Objects for Later Models 
 #All Fraser Only 
@@ -48,40 +45,325 @@ FRECOMPSITES <- FRESITES %>%
 FREREFSITES <- FRESITES %>%
   filter(REFERENCE == "YES") 
 
+#STANDARDIZING DATA FOR MODELS
+
 #standardize continuous variables to be centered on the mean (mean becomes 0) using the standardize function from robustHD  
-FRECOMPSITES$SAMPLING_AGE <-standardize(FRECOMPSITES$SAMPLING_AGE, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$AREA_MAPPED <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$KM_UPRIVER <-standardize(FRECOMPSITES$KM_UPRIVER, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$ELEVATION <-standardize(FRECOMPSITES$ELEVATION, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$PROX_CHAN <-standardize(FRECOMPSITES$PROX_CHAN, centerFun = mean, scaleFun = sd)
-FRECOMPSITES$CARELYN_MH <-standardize(FRECOMPSITES$CARELYN_MH, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$SAMPLING_AGEs <-standardize(FRECOMPSITES$SAMPLING_AGE, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$AREA_MAPPEDs <-standardize(FRECOMPSITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$KM_UPRIVERs <-standardize(FRECOMPSITES$KM_UPRIVER, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$ELEVATIONs <-standardize(FRECOMPSITES$ELEVATION, centerFun = mean, scaleFun = sd)
+FRECOMPSITES$PROX_CHANs <-standardize(FRECOMPSITES$PROX_CHAN, centerFun = mean, scaleFun = sd)
+#FRECOMPSITES$CARELYN_MH <-standardize(FRECOMPSITES$CARELYN_MH, centerFun = mean, scaleFun = sd)
+
+#standardize continuous variables to be centered on the mean (mean becomes 0) using the standardize function from robustHD  
+FRESITES$SAMPLING_AGEs <-standardize(FRESITES$SAMPLING_AGE, centerFun = mean, scaleFun = sd)
+FRESITES$AREA_MAPPEDs <-standardize(FRESITES$AREA_MAPPED, centerFun = mean, scaleFun = sd)
+FRESITES$KM_UPRIVERs <-standardize(FRESITES$KM_UPRIVER, centerFun = mean, scaleFun = sd)
+FRESITES$ELEVATIONs <-standardize(FRESITES$ELEVATION, centerFun = mean, scaleFun = sd)
+FRESITES$PROX_CHANs <-standardize(FRESITES$PROX_CHAN, centerFun = mean, scaleFun = sd)
+FRESITES$CARELYN_MHs <-standardize(FRESITES$CARELYN_MH, centerFun = mean, scaleFun = sd)
 
 ###RESEARCH QUESTION #2: What factors affect the health of existing marshes?
 
-#MODEL 2A:Invasive Dominance
+#Exploratory Plots
+
+#reference
+M2.1 <- ggplot(FRECOMPSITES, aes(x=SAMPLE_YEAR,y=RC_Native)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Sample Year", y = "Relative % Cover Native") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#river arm 
+M2.2 <- ggplot(FRECOMPSITES, aes(x=ARM,y=RC_Native)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="River Arm", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#project age
+M2.3 <- ggplot(FRESITES, aes(x=SAMPLING_AGE,y=RC_Native)) +
+  geom_point(alpha = 0.3) +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Project Age", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#proximity
+M2.4 <- ggplot(FRECOMPSITES, aes(x=PROX_CHAN,y=RC_Native)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Channel Proximity (m)", y = "Relative % Cover Native") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#km upstream
+M2.5 <- ggplot(FRECOMPSITES, aes(x=KM_UPRIVER,y=RC_Native)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Distance Upriver (km)", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#elevation
+M2.6 <- ggplot(FRECOMPSITES, aes(x=ELEVATION,y=RC_Native)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Elevation (m)", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#interaction of elevation an distance upriver
+#first have to calculate mean, and mean +/- sd for visualisation
+FRECOMPSITES$ELEVATION_2tile <- ntile(FRECOMPSITES$ELEVATION, 2)
+FRECOMPSITES$ELEVATION_3tile <- ntile(FRECOMPSITES$ELEVATION, 3)
+x <- FRECOMPSITES$ELEVATION
+
+FRECOMPSITES$ELEVATION3group <-
+  case_when(x > mean(x)+sd(x) ~ "high",
+            x < mean(x)+sd(x) & x > mean(x)-sd(x) ~ "average",
+            x < mean(x)-sd(x) ~ "low")
+
+count(FRECOMPSITES,FRECOMPSITES$ELEVATION3group)
+FRECOMPSITES$ELEVATION3group <- factor(FRECOMPSITES$ELEVATION3group, levels = c("high", "average", "low"))
+
+#plot 
+M2.7 <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Native, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none",
+        legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
+  labs(x ="Distance Upriver (km)", y = "Relative % Cover Native", color = "Elevation") 
+
+M2.7.2 <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Native, group = ELEVATION3group, color = ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), legend.box.margin = margin(-60,-10,0,-80), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "left",
+        legend.title = element_text(size=9), legend.text = element_text(size=9),legend.background = element_blank()) +
+  labs(x ="Distance Upriver (km)", y = "Relative % Cover Native", color = "Elevation") 
+
+#legend: note that margin order is "top", "right", "bottom", "left"
+M2.7Legend <- get_legend(M2.7.2) 
+
+#creation of panel figure for paper!
+M2TopRow <- plot_grid(M2.1, M2.2, M2.3, align = "h", axis = "l", ncol =3)
+M2MidRow <- plot_grid(M2.4,M2.5,M2.6,align = "h",axis = "l", ncol =3)
+M2BotRow <- plot_grid("",M2.7,M2.7Legend,align = "h",axis = "l", ncol =3)
+plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
+
+###MODEL 2:
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
-MODEL2A <- lmer(RC_Invasive~(SAMPLING_AGE+ARM+KM_UPRIVER*ELEVATION+PROX_CHAN) + (1|SITE),data =FRECOMPSITES)
-summary(MODEL2A)
-Anova(MODEL2A)
-AIC(MODEL2A)
+MODEL2A1 <- lmer(RC_Native~(SAMPLE_YEAR + ARM + SAMPLING_AGEs + PROX_CHANs + KM_UPRIVERs*ELEVATIONs + KM_UPRIVERs*TYPHA_PRESENT) + (1|SITE),data = FRECOMPSITES, REML = TRUE)
+
+#SUMMARY DATA
+summary(MODEL2A1)
+visreg(MODEL2A1)
+anova(MODEL2A1, type=3)
+
+#CHECKING MODEL ASSUMPTIONS
+plot(MODEL2A1) #looks good, no patterns evident
+qqnorm(resid(MODEL2A1)) 
+  qqline(resid(MODEL2A1)) #points fall along line, look good
+
+#checking variable inflation factor (VIF)
+vif(MODEL2A1)
+
+#MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
+#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
+visreg(MODEL2A1, points.par = list(pch = 16, cex = 1.2, col = "red"),type="contrast")
+#plotting interaction effect
+visreg(MODEL2A1,"ELEVATIONs", by = "KM_UPRIVERs", overlay=TRUE,partial = FALSE, gg=TRUE) + 
+  theme_bw()+
+  xlab("Distance to Nearest Channel") + ylab("Relative % Cover Native") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 
-visreg(MODEL2A)
+#COEFFICIENT PLOT
+set_theme(base = theme_classic()) #To remove the background color and the grids
+#ploting model coefficients
+#names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
+plot_model(MODEL2A1, show.values = TRUE, value.offset = .3, title = "Relative % Cover Native", ci.lvl = .95,
+           axis.labels = c('Distance Upriver:Elevation','Elevation','Distance Upriver','Channel Proximity','Project Age','Arm [North]','Sample Year')) 
+
+
+###MODEL 2A:Invasive Dominance
+##PLOTTING DATA
+
+#SAMPLE YEAR
+M2.1B <- ggplot(FRECOMPSITES, aes(x=SAMPLE_YEAR,y=RC_Invasive)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3) +
+  labs(x ="Sample Year", y = "Relative % Cover Invasive") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#river arm 
+M2.2B <- ggplot(FRECOMPSITES, aes(x=ARM,y=RC_Invasive)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="River Arm", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#project age
+M2.3B <- ggplot(FRESITES, aes(x=SAMPLING_AGE,y=RC_Invasive)) +
+  geom_point(alpha = 0.3) +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Project Age", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#proximity
+M2.4B <- ggplot(FRECOMPSITES, aes(x=PROX_CHAN,y=RC_Invasive)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Channel Proximity (m)", y = "Relative % Cover Invasive") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#km upstream
+M2.5B <- ggplot(FRECOMPSITES, aes(x=KM_UPRIVER,y=RC_Invasive)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Distance Upriver (km)", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#elevation
+M2.6B <- ggplot(FRECOMPSITES, aes(x=ELEVATION,y=RC_Invasive)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Elevation (m)", y = "") +
+  ylim(0,100) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#interaction of elevation an distance upriver
+#first have to calculate mean, and mean +/- sd for visualisation
+FRECOMPSITES$ELEVATION_2tile <- ntile(FRECOMPSITES$ELEVATION, 2)
+FRECOMPSITES$ELEVATION_3tile <- ntile(FRECOMPSITES$ELEVATION, 3)
+x <- FRECOMPSITES$ELEVATION
+
+FRECOMPSITES$ELEVATION3group <-
+  case_when(x > mean(x)+sd(x) ~ "high",
+            x < mean(x)+sd(x) & x > mean(x)-sd(x) ~ "average",
+            x < mean(x)-sd(x) ~ "low")
+
+count(FRECOMPSITES,FRECOMPSITES$ELEVATION3group)
+FRECOMPSITES$ELEVATION3group <- factor(FRECOMPSITES$ELEVATION3group, levels = c("high", "average", "low"))
+
+#plot
+M2.7B <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Invasive, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none",
+        legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
+  labs(x ="Distance Upriver (km)", y = "Relative % Cover Invasive", color = "Elevation") 
+
+M2.7.2B <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Invasive, group = ELEVATION3group, color = ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), legend.box.margin = margin(-60,-10,0,-80), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "left",
+        legend.title = element_text(size=9), legend.text = element_text(size=9),legend.background = element_blank()) +
+  labs(x ="Distance Upriver (km)", y = "Relative % Cover Invasive", color = "Elevation") 
+#legend: note that margin order is "top", "right", "bottom", "left"
+M2.7BLegend <- get_legend(M2.7.2B) 
+
+M2.8B <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = TYPHA_PRESENT, y = RC_Invasive) +
+  geom_boxplot(alpha = .3) +
+  geom_jitter(alpha = 0.3) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none",
+        legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
+  labs(x ="Typha Present", y = "Relative % Cover Invasive", color = "Elevation") 
+
+M2.9B <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Invasive, group = TYPHA_PRESENT, color = TYPHA_PRESENT) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none",
+        legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
+  labs(x ="Distance Upriver (km)", y = "Relative % Cover Invasive", color = "Elevation") 
+
+#creation of panel figure for paper!
+M2TopRow <- plot_grid(M2.1B, M2.2B, M2.3B, align = "h", axis = "l", ncol =3)
+M2MidRow <- plot_grid(M2.4B,M2.5B,M2.6B,align = "h",axis = "l", ncol =3)
+M2BotRow <- plot_grid(M2.8B,M2.7B,M2.7BLegend,align = "h",axis = "l", ncol =3)
+plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
+
+
+MODEL2B1 <- lmer(RC_Invasive~(ARM + SAMPLING_AGEs + PROX_CHANs + KM_UPRIVERs*ELEVATIONs + KM_UPRIVERs*TYPHA_PRESENT) + (1|SITE) + (1S),data = FRECOMPSITES, REML = TRUE)
+
+#SUMMARY DATA
+summary(MODEL2B1)
+visreg(MODEL2B1)
+anova(MODEL2B1, type=3)
+
+#CHECKING MODEL ASSUMPTIONS
+plot(MODEL2B1) #looks good, no patterns evident
+qqnorm(resid(MODEL2B1)) 
+qqline(resid(MODEL2B1)) #points fall along line, look good
+
+#checking variable inflation factor (VIF)
+vif(MODEL2B1)
+
+#MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
+#plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
+visreg(MODEL2B1, points.par = list(pch = 16, cex = 1.2, col = "red"),type="contrast")
+#plotting interaction effect
+visreg(MODEL2B1,"ELEVATIONs", by = "KM_UPRIVERs", overlay=TRUE,partial = FALSE, gg=TRUE) + 
+  theme_bw()+
+  xlab("Distance to Nearest Channel") + ylab("Relative % Cover Invasive") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
+#COEFFICIENT PLOT
+set_theme(base = theme_classic()) #To remove the background color and the grids
+#ploting model coefficients
+#names(MODEL2B1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
+plot_model(MODEL2B1, show.values = TRUE, value.offset = .3, title = "Relative % Cover Invasive", ci.lvl = .95,
+           axis.labels = c('Distance Upriver:Elevation','Elevation','Distance Upriver','Channel Proximity','Project Age','Arm [North]','Sample Year')) 
 
 
 
-MODEL2A <- lmer(RC_Invasive~(SAMPLING_AGE+ARM+KM_UPRIVER+ELEVATION+PROX_CHAN) + (1|SAMPLE_YEAR) + (1|SITE),data =FRECOMPSITES)
 
 
-glmer(1+RAMETS ~ (TREATMENTCODE+YEAR+ELEVATION)^3 + (1|PLOT), data = AUGUSTDATA,
-      family=poisson(link="log"))
 
-                
-                
-RE: SITE, SAMPLE_YEAR
+
+
+
+
+
+
+
 
 #RESULTS
 summary(MODEL2A)
@@ -479,13 +761,82 @@ summary(JULYRAMETMODEL)
 
 
 
+M2.1 <- ggplot(FRESITES, aes(x=SAMPLING_AGE,y=RC_Native)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Age (years)", y = "Relative % Cover Native") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+
+#interaction of distance upriver and river arm
+M2.8 <- FRESITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Native, group = ARM, color = ARM) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "right") +
+  labs(x ="Distance Upriver (km)", y = "Relative % Cover Native", color = "River Arm") 
 
 
 
 
+#interaction of elevation an channel prox
+#plot
+M2.8 <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = PROX_CHAN, y = RC_Native, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none") +
+  ylim(0,100) +
+  labs(x ="Channel Proximity (m)", y = "", color = "Elevation") 
+
+#interaction of elevation an channel prox
+#first have to calculate mean, and mean +/- sd for visualisation
+
+#interaction of elevation and river arm 
+#plot
+M2.9 <- FRESITES %>%
+  ggplot() +
+  aes(x = D, y = RC_Native, color = ARM) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "bottom") +
+  ylim(0,100) +
+  labs(x ="Elevation (m)", y = "", color = "River Arm") 
+
+#dummy for legend
+M2.9 <- FRESITES %>%
+  ggplot() +
+  aes(x = ELEVATION, y = RC_Native, color = ARM) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "bottom") +
+  ylim(0,100) +
+  labs(x ="Elevation (m)", y = "", color = "River Arm") 
 
 
 
+M2.8 <- FRESITES %>%
+  ggplot() +
+  aes(x = KM_UPRIVER, y = RC_Native, color = ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ARM) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none") +
+  ylim(0,100) +
+  labs(x ="", y = "", color = "Elevation") 
 
-
+M2.6 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=RC_Native)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Channel Proximity (m)", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
