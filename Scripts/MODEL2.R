@@ -17,6 +17,8 @@ library("lmerTest")
 library("fitdistrplus")
 library("ggpubr")
 library("emmeans")
+library("MuMIn")
+
 
 
 #LOADING MASTER DATA .CSV 
@@ -134,10 +136,22 @@ M2.7.2 <- FRECOMPSITES %>%
 #legend: note that margin order is "top", "right", "bottom", "left"
 M2.7Legend <- get_legend(M2.7.2) 
 
+#channel proximity and elevation interaction
+M2.8 <- FRECOMPSITES %>%
+  ggplot() +
+  aes(x = PROX_CHAN, y = RC_Native, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
+  geom_point(alpha = .3) +
+  geom_smooth(method = "lm") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none",
+        legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
+  labs(x ="Channel Proximity (m)", y = "", color = "Elevation") 
+
+
 #creation of panel figure for paper!
 M2TopRow <- plot_grid(M2.1, M2.2, M2.3, align = "h", axis = "l", ncol =3)
 M2MidRow <- plot_grid(M2.4,M2.5,M2.6,align = "h",axis = "l", ncol =3)
-M2BotRow <- plot_grid("",M2.7,M2.7Legend,align = "h",axis = "l", ncol =3)
+M2BotRow <- plot_grid(M2.7,M2.8,M2.7Legend,align = "h",axis = "l", ncol =3)
 plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
 
 ###MODEL 2:
@@ -145,12 +159,17 @@ plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
-MODEL2 <- lmer(RC_Native~(ARM + SAMPLING_AGE + PROX_CHAN + KM_UPRIVER*ELEVATION + PROX_CHAN*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRECOMPSITES)
+MODEL2 <- lmer(RC_Native~(ARM + SAMPLING_AGE + KM_UPRIVER*ELEVATION + PROX_CHAN*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRECOMPSITES)
 
 #SUMMARY DATA
 summary(MODEL2)
 visreg(MODEL2)
 anova(MODEL2, type=3)
+
+#getting model fit data
+r2_nakagawa(MODEL2)
+lmer_summary(MODEL2)
+
 
 #CHECKING MODEL ASSUMPTIONS
 plot(MODEL2) #looks good, no patterns evident
@@ -159,6 +178,8 @@ qqnorm(resid(MODEL2))
 
 #checking variable inflation factor (VIF)
 vif(MODEL2)
+
+
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
