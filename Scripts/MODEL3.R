@@ -17,6 +17,9 @@ library("lmerTest")
 library("fitdistrplus")
 library("ggpubr")
 library("emmeans")
+library("performance")
+
+citation("performance")
 #Loading Libraries
 
 
@@ -73,7 +76,8 @@ M3.1 <- ggplot(FRESITES, aes(x=REFERENCE,y=NAT_RICH)) +
   geom_boxplot() +
   geom_jitter(alpha = 0.2) +
   geom_smooth(method = 'lm') +
-  labs(x ="Reference Site", y = "Native Richness/Plot") +
+  ylim(0,14) +
+  labs(x ="Reference Site", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
@@ -83,31 +87,45 @@ M3.2 <- ggplot(FRESITES, aes(x=ARM,y=NAT_RICH)) +
   geom_boxplot() +
   geom_jitter(alpha = 0.2) +
   geom_smooth(method = 'lm') +
+  ylim(0,14) +
   labs(x ="River Arm", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
+#inland
+M3.3 <- ggplot(FRESITES, aes(x=INLAND,y=NAT_RICH)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.2) +
+  geom_smooth(method = 'lm') +
+  ylim(0,14) +
+  labs(x ="Inland Basin", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
 #proximity
-M3.3 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NAT_RICH)) +
+M3.4 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NAT_RICH)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = 'lm') +
+  ylim(0,14) +
   labs(x ="Channel Proximity (m)", y = "Native Richness/Plot") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 #km upstream
-M3.4 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NAT_RICH)) +
+M3.5 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NAT_RICH)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = 'lm') +
+  ylim(0,14) +
   labs(x ="Distance Upriver (km)", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 #elevation
-M3.5 <- ggplot(FRESITES, aes(x=ELEVATION,y=NAT_RICH)) +
+M3.6 <- ggplot(FRESITES, aes(x=ELEVATION,y=NAT_RICH)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = 'lm') +
   labs(x ="Elevation (m)", y = "") +
+  ylim(0,14) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
@@ -126,28 +144,30 @@ count(FRESITES,FRESITES$ELEVATION3group)
 FRESITES$ELEVATION3group <- factor(FRESITES$ELEVATION3group, levels = c("high", "average", "low"))
 
 #plot 
-M3.6 <- FRESITES %>%
+M3.7 <- FRESITES %>%
   ggplot() +
   aes(x = KM_UPRIVER, y = NAT_RICH, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
   geom_point(alpha = .2) +
   geom_smooth(method = "lm") +
+  ylim(0,14) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "none",
         legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
-  labs(x ="Distance Upriver (km)", y = "Native Richness/Plot", color = "Elevation") 
+  labs(x ="Distance Upriver (km)", y = "", color = "Elevation") 
 
-M3.6.2 <- FRESITES %>%
+M3.7.2 <- FRESITES %>%
   ggplot() +
   aes(x = KM_UPRIVER, y = NAT_RICH, color = ELEVATION3group) +
   geom_point(alpha = .2) +
   geom_smooth(method = "lm") +
+  ylim(0,14) +
   theme(panel.grid.major = element_blank(), legend.box.margin = margin(-60,0,0,-10),panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),legend.position = "left",
         legend.title = element_text(size=9), legend.text = element_text(size=9),legend.background = element_blank()) +
-  labs(x ="Distance Upriver (km)", y = "Native Richness/Plot", color = "Elevation") 
+  labs(x ="Distance Upriver (km)", y = "", color = "Elevation") 
 
 #legend: note that margin order is "top", "right", "bottom", "left"
-M3.6Legend <- get_legend(M3.6.2) 
+M3.7Legend <- get_legend(M3.7.2) 
 
 
 #interaction of elevation an distance upriver
@@ -162,18 +182,12 @@ M3.7 <- FRESITES %>%
         legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
   labs(x ="Channel Proximity (m)", y = "", color = "Elevation") 
 
-#creation of panel figure for paper!
-M3TopRow <- plot_grid("",M3.1,"", M3.2,"", align = "h", axis = "l", ncol =5, rel_widths = c(.3,1,.3,1,.3))
-M3MidRow <- plot_grid(M3.3,M3.4,M3.5,align = "h",axis = "l", ncol =3)
-M3BotRow <- plot_grid("",M3.6,M3.6Legend,align = "h",axis = "l", ncol =3)
-plot_grid(M3TopRow,M3MidRow,M3BotRow, ncol = 1, align = "h")
-
 ###MODEL 3:
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
-MODEL3 <- lmer(NAT_RICH~(ARM + REFERENCE + PROX_CHAN + KM_UPRIVER + ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRESITES, REML = TRUE)
+MODEL3 <- lmer(NAT_RICH~(INLAND + ARM + REFERENCE + PROX_CHAN + KM_UPRIVER*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRESITES)
 
 #SUMMARY DATA
 summary(MODEL3)
@@ -181,12 +195,13 @@ visreg(MODEL3)
 anova(MODEL3, type=3)
 
 #CHECKING MODEL ASSUMPTIONS
-plot(MODEL3A) #looks good, no patterns evident
-qqnorm(resid(MODEL3A)) 
-  qqline(resid(MODEL3A)) #points fall along line, look good
-
+plot(MODEL3) #looks good, no patterns evident
+qqnorm(resid(MODEL3)) 
+  qqline(resid(MODEL3)) #points fall along line, look good
+  r.squaredGLMM(MODEL3)
+  
 #checking variable inflation factor (VIF)
-vif(MODEL3A)
+vif(MODEL3)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
@@ -205,6 +220,9 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
 #names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
 plot_model(MODEL3, show.values = TRUE, value.offset = .3, title = "Native Richness/plot", ci.lvl = .95,sort.est = TRUE,
-           axis.labels = c('Distance Upriver:Elevation',"Channel Proximity",'Distance Upriver','Arm [North]','Reference [Yes]','Elevation')) 
+           axis.labels = c('Inland Basin [Yes]','Reference [Yes]','Distance Upriver:Elevation',"Channel Proximity",'Arm [North]','Distance Upriver','Elevation')) +
+  ylim(-2,2)
+  
+
 
 

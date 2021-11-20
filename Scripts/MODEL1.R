@@ -109,6 +109,16 @@ M1.9 <- ggplot(FRECOMPSITES, aes(x=ARM,y=PRCNT_MUDFLAT)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
+#inland basin
+M1.10 <- ggplot(FRECOMPSITES, aes(x=INLAND,y=PRCNT_MUDFLAT)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3) +
+  geom_smooth(method = 'lm') +
+  labs(x ="Inland Basin", y = "% Recessed Marsh") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+
 #interaction between elevation and % edge 
 #first have to calculate mean, and mean +/- sd for visualisation
 FRECOMPSITES$ELEV_MEAN_2tile <- ntile(FRECOMPSITES$ELEV_MEAN, 2)
@@ -124,7 +134,7 @@ count(FRECOMPSITES,FRECOMPSITES$ELEV_MEAN3group)
 FRECOMPSITES$ELEV_MEAN3group <- factor(FRECOMPSITES$ELEV_MEAN3group, levels = c("high", "average", "low"))
 
 #plot 
-M1.10 <- FRECOMPSITES %>%
+M1.11 <- FRECOMPSITES %>%
 ggplot() +
   aes(x = PRCNT_EDGE, y = PRCNT_MUDFLAT, group = ELEV_MEAN3group, color = ELEV_MEAN3group) +
   geom_point(alpha = .3) +
@@ -135,7 +145,7 @@ ggplot() +
   labs(x ="% Edge Habitat", y = "% Recessed Marsh", color = "Elevation") 
 
 #dummy plot for legend 
-M1.10L <- FRECOMPSITES %>%
+M1.11L <- FRECOMPSITES %>%
   ggplot() +
   aes(x = PRCNT_EDGE, y = PRCNT_MARSH, group = ELEV_MEAN3group, color = ELEV_MEAN3group) +
   geom_point(alpha = .7) +
@@ -147,13 +157,13 @@ M1.10L <- FRECOMPSITES %>%
   labs(x ="% Edge Habitat", y = "% Recessed Marsh", color = "Elevation") 
 
 #legend object
-M1.10Legend <- get_legend(M1.8L + theme(legend.box.margin = margin(-50,0,0,-100))) #note that margin order is "top", "right", "bottom", "left"
+M1.11Legend <- get_legend(M1.8L + theme(legend.box.margin = margin(-50,0,0,-100))) #note that margin order is "top", "right", "bottom", "left"
 
 #creation of panel figure for paper
 M1TopRow <- plot_grid(M1.1, M1.2, M1.3, align = "h", axis = "l", ncol =3) # top row
 M1MidRow <- plot_grid(M1.4, M1.5, M1.6, align = "h", axis = "l", ncol =3) # middle row
 M1MidRow2 <- plot_grid(M1.7,M1.8,M1.9, align = "h", axis = "l", ncol =3) # 2nd middle row
-M1BotRow <- plot_grid("",M1.10,M1.10Legend, align = "h", axis = "l", ncol =3) # bottom row
+M1BotRow <- plot_grid(M1.10,M1.11,M1.11Legend, align = "h", axis = "l", ncol =3) # bottom row
 plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h")
 
 
@@ -165,7 +175,9 @@ plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h")
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 
 #Experimenting with all covariates (MODEL1A), and only covariates that had simple linear regression p values of <.20 (MODEL1B)
-MODEL1 <- lm(PRCNT_MUDFLAT ~ (LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES)
+AIC(MODEL1)
+
 
 #model results 
 summary(MODEL1)
@@ -190,7 +202,7 @@ visreg(MODEL1,"PRCNT_EDGE", by = "ELEV_MEAN", overlay=TRUE,partial = FALSE, gg=T
 #COEFFICIENT PLOT
 set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
-names(MODEL1$coefficients) <- c('Intercept','Log Fence Present','Shear Boom','Offshore Structure', 'Age', 'Size','Distance Upriver', 'North Arm', '% Edge', 'Mean Elevation', '% Edge:Mean Elevation')
+names(MODEL1$coefficients) <- c('Intercept','Inland Basin [Yes]','Log Fence [Present]','Shear Boom [Present]','Offshore Structure [Present]', 'Project Age', 'Size','Distance Upriver', 'Arm [North]', '% Edge', 'Mean Elevation', '% Edge:Mean Elevation')
 plot_model(MODEL1, show.values = TRUE, value.offset = .3, title = "% Recessed Marsh", ci.lvl = .95,sort.est = TRUE)
 
 #OLD CODE: Kept Just in Case

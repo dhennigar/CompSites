@@ -89,8 +89,19 @@ M4.2 <- ggplot(FRESITES, aes(x=ARM,y=NN_RICH)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
+#inland
+M4.3 <- ggplot(FRESITES, aes(x=INLAND,y=NAT_RICH)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.2) +
+  geom_smooth(method = 'lm') +
+  ylim(0,14) +
+  labs(x ="Inland Basin", y = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+
 #proximity
-M4.3 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NN_RICH)) +
+M4.4 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NN_RICH)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = 'lm') +
   labs(x ="Channel Proximity (m)", y = "Non-Native Richness/Plot") +
@@ -99,7 +110,7 @@ M4.3 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NN_RICH)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 #km upstream
-M4.4 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NN_RICH)) +
+M4.5 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NN_RICH)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = 'lm') +
   labs(x ="Distance Upriver (km)", y = "") +
@@ -108,7 +119,7 @@ M4.4 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NN_RICH)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 #elevation
-M4.5 <- ggplot(FRESITES, aes(x=ELEVATION,y=NN_RICH)) +
+M4.6 <- ggplot(FRESITES, aes(x=ELEVATION,y=NN_RICH)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = 'lm') +
   labs(x ="Elevation (m)", y = "") +
@@ -131,7 +142,7 @@ count(FRESITES,FRESITES$ELEVATION3group)
 FRESITES$ELEVATION3group <- factor(FRESITES$ELEVATION3group, levels = c("high", "average", "low"))
 
 #plot 
-M4.6 <- FRESITES %>%
+M4.7 <- FRESITES %>%
   ggplot() +
   aes(x = KM_UPRIVER, y = NN_RICH, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
   geom_point(alpha = .2) +
@@ -142,7 +153,7 @@ M4.6 <- FRESITES %>%
         legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
   labs(x ="Distance Upriver (km)", y = "", color = "Elevation") 
 
-M4.6.2 <- FRESITES %>%
+M4.7.2 <- FRESITES %>%
   ggplot() +
   aes(x = KM_UPRIVER, y = NN_RICH, color = ELEVATION3group) +
   geom_point(alpha = .2) +
@@ -153,11 +164,11 @@ M4.6.2 <- FRESITES %>%
   labs(x ="Distance Upriver (km)", y = "", color = "Elevation") 
 
 #legend: note that margin order is "top", "right", "bottom", "left"
-M4.6Legend <- get_legend(M4.6.2) 
+M4.7Legend <- get_legend(M4.7.2) 
 
 
 #interaction of channel proximity and elevation
-M4.7 <- FRESITES %>%
+M4.8 <- FRESITES %>%
   ggplot() +
   aes(x = PROX_CHAN, y = NN_RICH, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
   geom_point(alpha = .2) +
@@ -168,19 +179,12 @@ M4.7 <- FRESITES %>%
         legend.title = element_text(size=10), legend.text = element_text(size=10),legend.background = element_blank()) +
   labs(x ="Channel Proximity (m)", y = "", color = "Elevation") 
 
-#creation of panel figure for paper!
-M4TopRow <- plot_grid("",M4.1,"", M4.2,"", align = "h", axis = "l", ncol =5, rel_widths = c(.3,1,.3,1,.3))
-M4MidRow <- plot_grid(M4.3,M4.4,M4.5,align = "h",axis = "l", ncol =3)
-plot_grid(M4TopRow,M4MidRow, ncol = 1, align = "h")
-
-###MODEL 3:
+###MODEL 4:
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
-MODEL4 <- lmer(NN_RICH~(ARM + REFERENCE + PROX_CHAN + KM_UPRIVER + ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRESITES, REML = TRUE)
-
-AIC(MODEL4)
+MODEL4 <- lmer(NN_RICH~(INLAND + ARM + REFERENCE + PROX_CHAN + KM_UPRIVER*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRESITES, REML = TRUE)
 
 #SUMMARY DATA
 summary(MODEL4)
@@ -191,9 +195,7 @@ anova(MODEL4, type=3)
 plot(MODEL4) #looks good, no patterns evident
 qqnorm(resid(MODEL4)) 
 qqline(resid(MODEL4)) #points fall along line, look good
-
-#getting model fit data using lmertest
-r2_nakagawa(MODEL4)
+r.squaredGLMM(MODEL4)
 
 #checking variable inflation factor (VIF)
 vif(MODEL4)
@@ -215,16 +217,5 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
 #names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
 plot_model(MODEL4, show.values = TRUE, value.offset = .3, title = "Non-Native Richness/plot", ci.lvl = .95,sort.est = TRUE,
-           axis.labels = c('Reference [Yes]',"Arm [North]",'Distance Upriver:Elevation','Channel Proximity','Distance Upriver','Elevation')) 
-
-
-
-#creation of panel figure for paper!
-ROW1 <- plot_grid(M3.1,"", M4.1, align = "h", axis = "l", ncol =3, rel_widths = c(1,.3,1)))
-ROW2 <- plot_grid(M3.2,"",M4.2, align = "h", axis = "l", ncol =3, rel_widths = c(1,.3,1))
-ROW3 <- plot_grid(M3.3,"",M4.3, align = "h", axis = "l", ncol =3, rel_widths = c(1,.3,1))
-ROW4 <- plot_grid(M3.4,"",M4.4, align = "h", axis = "l", ncol =3, rel_widths = c(1,.3,1))
-ROW5 <- plot_grid(M3.5,"",M4.5, align = "h", axis = "l", ncol =3, rel_widths = c(1,.3,1))
-ROW6 <- plot_grid(M3.6,M4.6Legend,M4.6, align = "h", axis = "l", ncol =3, rel_widths = c(1,.3,1))
-
-plot_grid(ROW1,ROW2,ROW3,ROW4,ROW5,ROW6, ncol = 1, align = "h")
+           axis.labels = c('Reference [Yes]',"Inland Basin [Yes]",'Arm [North]','Distance Upriver: Elevation','Channel Proximity','Distance Upriver','Elevation')) +
+  ylim(-2,2)

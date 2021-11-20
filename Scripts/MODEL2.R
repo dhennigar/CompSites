@@ -47,12 +47,12 @@ FREREFSITES <- FRESITES %>%
 #for the first angle we are looking at proportional dominance of native species
 
 ##Exploratory Plots for Review
-#reference
-M2.1 <- ggplot(FRECOMPSITES, aes(x=SAMPLE_YEAR,y=RC_Native)) +
+#inland
+M2.1 <- ggplot(FRECOMPSITES, aes(x=INLAND,y=RC_Native)) +
   geom_boxplot() +
   geom_jitter(alpha = 0.3) +
   geom_smooth(method = 'lm') +
-  labs(x ="Sample Year", y = "Relative % Cover Native") +
+  labs(x ="Inland Marsh", y = "Relative % Cover Native") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
@@ -159,7 +159,7 @@ plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
 #elevation*distance upriver is under the assumption that elevation-related stresses are most pronounced at estuary mouth
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
-MODEL2 <- lmer(RC_Native~(ARM + SAMPLING_AGE + KM_UPRIVER*ELEVATION + PROX_CHAN*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRECOMPSITES)
+MODEL2 <- lmer(RC_Native~(INLAND + ARM + SAMPLING_AGE + KM_UPRIVER*ELEVATION + PROX_CHAN*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRECOMPSITES)
 
 #SUMMARY DATA
 summary(MODEL2)
@@ -167,9 +167,7 @@ visreg(MODEL2)
 anova(MODEL2, type=3)
 
 #getting model fit data
-r2_nakagawa(MODEL2)
-lmer_summary(MODEL2)
-
+r.squaredGLMM(MODEL2)
 
 #CHECKING MODEL ASSUMPTIONS
 plot(MODEL2) #looks good, no patterns evident
@@ -178,8 +176,6 @@ qqnorm(resid(MODEL2))
 
 #checking variable inflation factor (VIF)
 vif(MODEL2)
-
-
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
@@ -198,10 +194,10 @@ visreg(MODEL2,"PROX_CHAN", by = "ELEVATION", overlay=TRUE,partial = FALSE, gg=TR
 
 #COEFFICIENT PLOT
 set_theme(base = theme_classic()) #To remove the background color and the grids
-#ploting model coefficients
+#plotting model coefficients
 #names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
 plot_model(MODEL2, show.values = TRUE, value.offset = .3, title = "Relative % Cover Native", ci.lvl = .95,sort.est = TRUE,
-           axis.labels = c('Distance Upriver','Channel Proximity:Elevation','Project Age','Distance Upriver:Elevation','Channel Proximity',"Arm [North]",'Elevation')) 
+           axis.labels = c('Inland Basin [Y]','Distance Upriver',"Arm [North]",'Channel Proximity:Elevation','Project Age','Distance Upriver:Elevation',"Channel Proximity",'Elevation')) 
 
 
 #OLD CODE (may need later)
