@@ -9,7 +9,7 @@ library(vegan)
 
 # global variables --------------------------------------------------------
 
-year = "2015" # SET THIS VARIABLE MANUALLY
+year = "2021" # SET THIS VARIABLE MANUALLY
 
 if (year == "2021"){
   datapath <- "./FieldData/2021/"
@@ -154,7 +154,7 @@ veg_plant_list <- function(longData){
 
 for(i in 1:length(files)){
   
-  filepath = paste(datapath, files[i], sep = "")
+  filepath <- paste(datapath, files[i], sep = "")
   site_long <- veg_import(filepath, year)
   
   site_codes <- site_long %>% 
@@ -194,3 +194,5 @@ if (year == 2015) {
 
 write.csv(project_results,
           paste(resultpath, "plot_results", year, ".csv", sep = ""))
+
+
