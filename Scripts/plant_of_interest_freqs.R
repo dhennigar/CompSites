@@ -4,30 +4,89 @@
 # libraries ---------------------------------------------------------------
 
 library(tidyverse)
-source("./Scripts/VegFunctions.R")
+
 
 # global variables --------------------------------------------------------
 
-year <- "2021"
+year <- "2015"
 
 if(year == "2021"){
   filepath <- "./FieldData/2021/"
   plants_of_interest <- c("CARELYN", "IRISPSE", "LYTHSAL",
-                        "PHALARU", "TYPHANG", "TYPHGLA")
+                        "PHALARU", "EXO_TYPHA")
 }
 
 if(year == "2015"){
   filepath <- "./FieldData/2015/csv/"
   plants_of_interest <- c("Lyngbye's sedge", "yellow iris", "purple loosestrife",
-                          "reed canarygrass","lesser cattail", "blue cattail")
+                          "reed canarygrass","EXO_TYPHA")
 }
 
 files <- list.files(filepath)
 
 freq_results <- data.frame()
 
-# main loop ---------------------------------------------------------------
 
+# function definitiosn ----------------------------------------------------
+
+plantFreq <- function(wideData, plants_of_interest){
+  result <- array()
+  for(i in 1:length(plants_of_interest)){
+    if(any(names(wideData) == plants_of_interest[i])){
+      presence <- wideData %>% 
+        select(plants_of_interest[i]) != 0
+      result[i] <-  presence %>% 
+        as.integer() %>% 
+        sum() / length(presence)
+    }else{
+      result[i] <- 0
+    }
+  }
+  return(result)
+}
+
+
+VegImport <- function(filepath, year){
+  # import vegetation data from a csv file
+  df <- read.csv(filepath, fileEncoding = "UTF-8-BOM")
+  df$PERCENT_COVER <- as.numeric(df$PERCENT_COVER)
+  df <- subset(df, COMMUNITY == 1)
+  
+  if(year == "2015"){
+    df <- df[1:8] # reduce issues with 2015 data importing
+    df$MAX_LH_CM <- df$MAX_LH # rename Lyngbye height column
+  }
+  
+  return(df)
+}
+
+
+VegLongToWide <- function(data){
+  # convert veg data from long to wide format
+  wideData <- data %>%
+    select(c(PLOT, SPECIES_CODE, PERCENT_COVER)) %>%
+    spread(SPECIES_CODE, PERCENT_COVER)
+  wideData[is.na(wideData)] <- 0
+  wideData <- wideData
+  
+  if (year == "2021"){
+    wideData$EXO_TYPHA <- wideData %>% 
+      select(any_of(c("TYPHANG", "TYPHGLA"))) %>% 
+      rowSums()
+  }
+  
+  if (year == "2015"){
+    wideData$EXO_TYPHA <- wideData %>% 
+      select(any_of(c("lesser cattail", "blue cattail"))) %>% 
+      rowSums()
+  }
+  
+  return(wideData)
+}
+
+
+# main loop ---------------------------------------------------------------
+ 
 for(i in 1:length(files)){
   site <- VegImport(paste(filepath, files[i], sep = ""), year) %>%
     filter(COMMUNITY == 1) %>% 
