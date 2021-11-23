@@ -144,17 +144,52 @@ veg_rel_abundance <- function(longData, plantList){
 }
 
 
+veg_dominance <- function(longData, plant_of_interest, plantList){
+  wideData <- longData %>% 
+    veg_long_to_wide() %>% 
+    select(-plantList$S)
+  
+  if(plant_of_interest == "EXO_TYPHA"){
+      if (year == "2021"){
+        wideData$EXO_TYPHA <- wideData %>% 
+          select(any_of(c("TYPHANG", "TYPHGLA"))) %>% 
+          rowSums()
+      }
+      
+      if (year == "2015"){
+        wideData$EXO_TYPHA <- wideData %>% 
+          select(any_of(c("lesser cattail", "blue cattail"))) %>% 
+          rowSums()
+      }
+  }
+  
+  if(plant_of_interest %in% names(wideData)){
+    poi_dominance <- wideData %>% 
+      select(plant_of_interest) / wideData %>% 
+      rowSums()
+  } else {
+    poi_dominance <- rep(NA, times = length(wideData[,1]))
+    names(poi_dominance) <- plant_of_interest
+  }
+  
+  return(poi_dominance)
+}
+  
+
+  
 veg_plant_list <- function(longData){
   plants <- tapply(longData$SPECIES_CODE, longData$ORIGIN, FUN = unique)
   return(as.list(plants))
 }
 
 
+
+
 # main loop ---------------------------------------------------------------
 
 for(i in 1:length(files)){
   
-  filepath = paste(datapath, files[i], sep = "")
+  filepath <- paste(datapath, files[i], sep = "")
   site_long <- veg_import(filepath, year)
   
   site_codes <- site_long %>% 
@@ -164,15 +199,33 @@ for(i in 1:length(files)){
   plants <- veg_plant_list(site_long)
   
   if (length(plants) == 0) {
-    project_results <- rbind(project_results, rep(NA, times = 8))
+    project_results <- rbind(project_results, rep(NA, times = 13))
     
   } else {
     
     site_diversity <- veg_diversity(site_long, plants)
   
     site_rel_abund <- veg_rel_abundance(site_long, plants)
+    
+    if(year == "2021"){
+      site_poi_dom <- data.frame(CARELYN = veg_dominance(site_long, "CARELYN", plants),
+                               IRISPSE = veg_dominance(site_long, "IRISPSE", plants),
+                               LYTHSAL = veg_dominance(site_long, "LYTHSAL", plants),
+                               PHALARU = veg_dominance(site_long, "PHALARU", plants),
+                               EXO_TYPHA = veg_dominance(site_long, "EXO_TYPHA", plants))
+    }
+    
+    if(year == "2015"){
+      site_poi_dom <- data.frame(CARELYN = veg_dominance(site_long, "Lyngbye's sedge", plants),
+                                 IRISPSE = veg_dominance(site_long, "yellow iris", plants),
+                                 LYTHSAL = veg_dominance(site_long, "purple loosestrife", plants),
+                                 PHALARU = veg_dominance(site_long, "reed canarygrass", plants),
+                                 EXO_TYPHA = veg_dominance(site_long, "EXO_TYPHA", plants)) 
+    }
+    
+    names(site_poi_dom) <- c("CARELYN", "IRISPSE", "LYTHSAL", "PHALARU", "EXO_TYPHA")
   
-    site_results <- c(site_codes, site_diversity, site_rel_abund)
+    site_results <- c(site_codes, site_diversity, site_rel_abund, site_poi_dom)
   
     project_results <- rbind(project_results, site_results)
     
@@ -192,5 +245,7 @@ if (year == 2015) {
     str_replace("-1-1-", "-1-")
 }
 
-write.csv(project_results,
-          paste(resultpath, "plot_results", year, ".csv", sep = ""))
+# write.csv(project_results,
+#           paste(resultpath, "plot_results", year, ".csv", sep = ""))
+
+

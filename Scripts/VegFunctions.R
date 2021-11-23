@@ -113,3 +113,24 @@ logCover <- function(wideData){
   }
   return(c(meanWoodyCover,sdWoodyCover))
 }
+
+plantFreq <- function(wideData, plants_of_interest){
+  result <- array()
+  for(i in 1:length(plants_of_interest)){
+    if(any(names(wideData) == plants_of_interest[i])){
+      presence <- wideData %>% 
+      select(plants_of_interest[i]) != 0
+      result[i] <-  presence %>% 
+      as.integer() %>% 
+      sum() / length(presence)
+    }else{
+      result[i] <- 0
+    }
+  }
+return(result)
+}
+
+
+
+
+
