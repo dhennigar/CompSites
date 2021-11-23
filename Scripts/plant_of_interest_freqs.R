@@ -8,7 +8,7 @@ library(tidyverse)
 
 # global variables --------------------------------------------------------
 
-year <- "2015"
+year <- "2021"
 
 if(year == "2021"){
   filepath <- "./FieldData/2021/"
@@ -26,8 +26,7 @@ files <- list.files(filepath)
 
 freq_results <- data.frame()
 
-
-# function definitiosn ----------------------------------------------------
+# function definitions ----------------------------------------------------
 
 plantFreq <- function(wideData, plants_of_interest){
   result <- array()
@@ -50,21 +49,27 @@ VegImport <- function(filepath, year){
   # import vegetation data from a csv file
   df <- read.csv(filepath, fileEncoding = "UTF-8-BOM")
   df$PERCENT_COVER <- as.numeric(df$PERCENT_COVER)
-  df <- subset(df, COMMUNITY == 1)
   
   if(year == "2015"){
-    df <- df[1:8] # reduce issues with 2015 data importing
-    df$MAX_LH_CM <- df$MAX_LH # rename Lyngbye height column
+    df <- df[1:8] %>% 
+      mutate(Site_Number = SITE_ID) %>% 
+      select(-SITE_ID)
   }
+  
+  # create PLOT_CODE column for unique plot identifiers. Filter out Riparian.
+  df <- df %>% 
+    mutate(PERCENT_COVER = as.numeric(PERCENT_COVER),
+           PLOT_CODE = paste(Site_Number, COMMUNITY, PLOT, sep = "-")) %>% 
+    filter(COMMUNITY != "RIP")
   
   return(df)
 }
 
 
-VegLongToWide <- function(data){
+VegLongToWide <- function(data, remove_codes = TRUE){
   # convert veg data from long to wide format
   wideData <- data %>%
-    select(c(PLOT, SPECIES_CODE, PERCENT_COVER)) %>%
+    select(c(PLOT_CODE, SPECIES_CODE, PERCENT_COVER)) %>%
     spread(SPECIES_CODE, PERCENT_COVER)
   wideData[is.na(wideData)] <- 0
   wideData <- wideData
@@ -81,12 +86,19 @@ VegLongToWide <- function(data){
       rowSums()
   }
   
+  if (remove_codes == TRUE){
+    return(wideData %>% select(-PLOT_CODE))
+  } else {
+    return(wideData)
+  }
+  
   return(wideData)
 }
 
 
 # main loop ---------------------------------------------------------------
- 
+
+# relative frequencies for plants of interest
 for(i in 1:length(files)){
   site <- VegImport(paste(filepath, files[i], sep = ""), year) %>%
     filter(COMMUNITY == 1) %>% 
