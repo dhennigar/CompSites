@@ -188,8 +188,8 @@ MODEL4 <- lmer(NN_RICH~(INLAND + ARM + REFERENCE + PROX_CHAN + KM_UPRIVER*ELEVAT
 
 #SUMMARY DATA
 summary(MODEL4)
-visreg(MODEL4)
-anova(MODEL4, type=3)
+visreg(MODEL4) #visreg plots
+anova(MODEL4, type=3) #anova
 
 #CHECKING MODEL ASSUMPTIONS
 plot(MODEL4) #looks good, no patterns evident
@@ -202,7 +202,7 @@ vif(MODEL4)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL4, points.par = list(pch = 16, cex = 1.2, col = "red"),type="contrast")
+visreg(MODEL4, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast", ylab="Non-Native Richness")
 
 
 #plotting interaction effect

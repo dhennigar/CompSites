@@ -3,6 +3,8 @@ library("tidyverse")
 library("tidyr")
 library("cowplot")
 
+#this code was used to create Figure 9 of the discussion
+
 #LOADING FREQFIG DATA .CSV 
 FREQFIG <- read.csv("~/Documents/R/CompSites/FieldData/FrequencyFigure.csv") 
 FRESITES <- FREQFIG %>%
@@ -36,6 +38,11 @@ PLOT1 <- ggplot(FRELONG, aes(x=DIST_UPRIVER_KM,y=PERCENT_FREQ, colour = SPECIES)
 
 #LOADING FREQFIG DATA .CSV 
 DOMFIG <- read.csv("~/Documents/R/CompSites/FieldData/InvDomFigure.csv") 
+DOMFIG[DOMFIG== 0] <- NA
+summary(DOMFIG$TYPHGLA)
+sd(DOMFIG$TYPHGLA,na.rm=TRUE)
+
+
 FREDOM <- DOMFIG %>%
   filter(RIVER == "Fraser"| RIVER == "Pitt") 
 
@@ -69,6 +76,6 @@ PLOT2B <- ggplot(DOMLONG, aes(x=SPECIES,y=RELATIVE_COV, colour= SPECIES)) +
 LEGEND <-get_legend(PLOT2B)
 
 
-plot_grid(PLOT1,LEGEND,PLOT2, ncol = 3, rel_widths = c(1,.5,1))
+cowplot::plot_grid(PLOT1,LEGEND,PLOT2, ncol = 3, rel_widths = c(1,.5,1))
 
   

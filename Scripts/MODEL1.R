@@ -9,10 +9,9 @@ library("cowplot") #for panel plots
 #LOADING MASTER DATA .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/SiteData_Master.csv") 
 
-#Ensuring Sample Year is a factor
+#Ensuring Sample Year and Area Mapped are in correct format
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)
 MASTERDATA$AREA_MAPPED_K <- as.numeric(MASTERDATA$AREA_MAPPED_K)
-
 
 ##Creating Subset Objects for Later Models 
 #All Fraser Only 
@@ -157,16 +156,14 @@ M1.11L <- FRECOMPSITES %>%
   labs(x ="% Edge Habitat", y = "% Recessed Marsh", color = "Elevation") 
 
 #legend object
-M1.11Legend <- get_legend(M1.8L + theme(legend.box.margin = margin(-50,0,0,-100))) #note that margin order is "top", "right", "bottom", "left"
+M1.11Legend <- get_legend(M1.11L + theme(legend.box.margin = margin(-50,0,0,-100))) #note that margin order is "top", "right", "bottom", "left"
 
 #creation of panel figure for paper
-M1TopRow <- plot_grid(M1.1, M1.2, M1.3, align = "h", axis = "l", ncol =3) # top row
-M1MidRow <- plot_grid(M1.4, M1.5, M1.6, align = "h", axis = "l", ncol =3) # middle row
-M1MidRow2 <- plot_grid(M1.7,M1.8,M1.9, align = "h", axis = "l", ncol =3) # 2nd middle row
-M1BotRow <- plot_grid(M1.10,M1.11,M1.11Legend, align = "h", axis = "l", ncol =3) # bottom row
-plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h")
-
-
+M1TopRow <- cowplot::plot_grid(M1.1, M1.2, M1.3, align = "h", axis = "l", ncol =3) # top row
+M1MidRow <- cowplot::plot_grid(M1.4, M1.5, M1.6, align = "h", axis = "l", ncol =3) # middle row
+M1MidRow2 <- cowplot::plot_grid(M1.7,M1.8,M1.9, align = "h", axis = "l", ncol =3) # 2nd middle row
+M1BotRow <- cowplot::plot_grid(M1.10,M1.11,M1.11Legend, align = "h", axis = "l", ncol =3) # bottom row
+cowplot::plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h")
 
 #####MODEL#####
 #MODEL 1: Percent Mudflat (recessed marsh)
@@ -178,20 +175,17 @@ plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h")
 MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES)
 AIC(MODEL1)
 
-
 #model results 
-summary(MODEL1)
-Anova(MODEL1, type=3)
-
-#model diagnostics
-#plotting model fit
-plot(MODEL1)
+summary(MODEL1) #summary table
+plot(MODEL1) #plotting model fit
 #Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
 vif(MODEL1) #none above 5, so no concerns (James et al. 2014)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #VISREG PACAKAGE: plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL1, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast")
+visreg(MODEL1, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast", ylab = "% Recessed Marsh")
+
+
 #plotting interaction effect
 visreg(MODEL1,"PRCNT_EDGE", by = "ELEV_MEAN", overlay=TRUE,partial = FALSE, gg=TRUE) + 
   theme_bw()+
@@ -204,6 +198,7 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
 names(MODEL1$coefficients) <- c('Intercept','Inland Basin [Yes]','Log Fence [Present]','Shear Boom [Present]','Offshore Structure [Present]', 'Project Age', 'Size','Distance Upriver', 'Arm [North]', '% Edge', 'Mean Elevation', '% Edge:Mean Elevation')
 plot_model(MODEL1, show.values = TRUE, value.offset = .3, title = "% Recessed Marsh", ci.lvl = .95,sort.est = TRUE)
+
 
 #OLD CODE: Kept Just in Case
 #standardize continuous variables to be centered on the mean (mean becomes 0) using the standardize function from robustHD  

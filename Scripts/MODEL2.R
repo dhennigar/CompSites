@@ -20,7 +20,6 @@ library("emmeans")
 library("MuMIn")
 
 
-
 #LOADING MASTER DATA .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODEL2_DATACLEAN.csv") 
 
@@ -149,10 +148,10 @@ M2.8 <- FRECOMPSITES %>%
 
 
 #creation of panel figure for paper!
-M2TopRow <- plot_grid(M2.1, M2.2, M2.3, align = "h", axis = "l", ncol =3)
-M2MidRow <- plot_grid(M2.4,M2.5,M2.6,align = "h",axis = "l", ncol =3)
-M2BotRow <- plot_grid(M2.7,M2.8,M2.7Legend,align = "h",axis = "l", ncol =3)
-plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
+M2TopRow <- cowplot::plot_grid(M2.1, M2.2, M2.3, align = "h", axis = "l", ncol =3)
+M2MidRow <- cowplot::plot_grid(M2.4,M2.5,M2.6,align = "h",axis = "l", ncol =3)
+M2BotRow <- cowplot::plot_grid(M2.7,M2.8,M2.7Legend,align = "h",axis = "l", ncol =3)
+cowplot::plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
 
 ###MODEL 2:
 #currently two interactions are included: elevation*distance upriver and arm*distance upriver
@@ -162,12 +161,10 @@ plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
 MODEL2 <- lmer(RC_Native~(INLAND + ARM + SAMPLING_AGE + KM_UPRIVER*ELEVATION + PROX_CHAN*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRECOMPSITES)
 
 #SUMMARY DATA
-summary(MODEL2)
-visreg(MODEL2)
-anova(MODEL2, type=3)
+summary(MODEL2) #summary table
 
 #getting model fit data
-r.squaredGLMM(MODEL2)
+r.squaredGLMM(MODEL2) 
 
 #CHECKING MODEL ASSUMPTIONS
 plot(MODEL2) #looks good, no patterns evident
@@ -179,16 +176,17 @@ vif(MODEL2)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL2, points.par = list(pch = 16, cex = 1.2, col = "red"),type="contrast")
+visreg(MODEL2, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast", ylab = "Relative % Cover Native")
+
 #plotting interaction effects
 visreg(MODEL2,"KM_UPRIVER", by = "ELEVATION", overlay=TRUE,partial = FALSE, gg=TRUE) + 
   theme_bw()+
-  xlab("Elevation") + ylab("Relative % Cover Native") +
+  xlab("Distance Upriver (km)") + ylab("Relative % Cover Native") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 visreg(MODEL2,"PROX_CHAN", by = "ELEVATION", overlay=TRUE,partial = FALSE, gg=TRUE) + 
   theme_bw()+
-  xlab("Channel Proximity") + ylab("Relative % Cover Native") +
+  xlab("Channel Proximity (m)") + ylab("Relative % Cover Native") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 

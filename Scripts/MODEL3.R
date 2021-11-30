@@ -205,7 +205,7 @@ vif(MODEL3)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL3, points.par = list(pch = 16, cex = 1.2, col = "red"),type="contrast")
+visreg(MODEL3, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast",ylab = "Native Richness")
 
 
 #plotting interaction effect
