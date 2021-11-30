@@ -4,54 +4,27 @@
 # import libraries
 library("BiodiversityR")
 library("tidyverse")
-
+source("./Scripts/VegFunctions.R")
 
 ### IMPORT DATA ###
 
-# edit file paths as necessary
+Comp <- VegImport("./FieldData/2021/11-001.csv", year = "2021") %>%
+  filter(ORIGIN != "S" & COMMUNITY == "1") %>% 
+  VegLongToWide()
 
-# Compensation Site
-Comp <- read.csv("./FieldData/2021/09-003.csv", fileEncoding = "UTF-8-BOM")
-Comp$PERCENT_COVER = as.numeric(Comp$PERCENT_COVER)
-Comp <- subset(Comp, COMMUNITY == 1)
-Comp <- subset(Comp, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY)) # select native species only and remove extra columns
+Ref1 <- VegImport("./FieldData/2021/REF-07.csv", year = "2021") %>% 
+  filter(ORIGIN != "S" & COMMUNITY == "1") %>% 
+  VegLongToWide()
 
-# Reference Site 1
-Ref1 <- read.csv("./FieldData/2021/Ref11.csv", fileEncoding = "UTF-8-BOM")
-Ref1$PERCENT_COVER <- as.numeric(Ref1$PERCENT_COVER)
-Ref1 <- subset(Ref1, COMMUNITY == 1)
-Ref1 <- subset(Ref1, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY))
-
-# Reference Site 2
-Ref2 <- read.csv("./FieldData/2021/Ref13.csv", fileEncoding = "UTF-8-BOM")
-Ref2$PERCENT_COVER <- as.numeric(Ref2$PERCENT_COVER)
-Ref2 <- subset(Ref2, COMMUNITY == 1)
-Ref2 <- subset(Ref2, ORIGIN == "N", select = c(-ORIGIN, -Site_Number, -COMMENTS, -MAX_LH_CM, -COMMUNITY))
-
-
-### TRANSFROM DATA FROM LONG TO WIDE FORMAT ###
-
-CompWIDE <- Comp %>%
-  spread(SPECIES_CODE, PERCENT_COVER)
-CompWIDE[is.na(CompWIDE)] <- 0
-CompWIDE <- CompWIDE[-1]
-
-Ref1WIDE <- Ref1 %>%
-  spread(SPECIES_CODE, PERCENT_COVER)
-Ref1WIDE[is.na(Ref1WIDE)] <- 0
-Ref1WIDE <- Ref1WIDE[-1]
-
-Ref2WIDE <- Ref2 %>%
-  spread(SPECIES_CODE, PERCENT_COVER)
-Ref2WIDE[is.na(Ref2WIDE)] <- 0
-Ref2WIDE <- Ref2WIDE[-1]
-
+Ref2 <- VegImport("./FieldData/2015/csv/REF-11-2015.csv", year = "2015") %>% 
+  filter(ORIGIN != "S" & COMMUNITY == "1") %>% 
+  VegLongToWide()
 
 ### CREATE SPECIES ACCUMULATION CURVES (SAC)
 
-CompRichness <- specaccum(CompWIDE)
-Ref1Richness <- specaccum(Ref1WIDE)
-Ref2Richness <- specaccum(Ref2WIDE)
+CompRichness <- specaccum(Comp)
+Ref1Richness <- specaccum(Ref1)
+Ref2Richness <- specaccum(Ref2)
 
 
 ### PLOT SAC
