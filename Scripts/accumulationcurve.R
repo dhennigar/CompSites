@@ -8,7 +8,7 @@ source("./Scripts/VegFunctions.R")
 
 ### IMPORT DATA ###
 
-Comp <- VegImport("./FieldData/2021/11-001.csv", year = "2021") %>%
+Comp <- VegImport("./FieldData/2021/12-003.csv", year = "2021") %>%
   filter(ORIGIN != "S" & COMMUNITY == "1") %>% 
   VegLongToWide()
 
@@ -38,7 +38,7 @@ lines(Ref1Richness, ci.type = "poly", ci.col = rgb(0.3,1,0.3,0.1), col = rgb(0,0
 lines(Ref2Richness, ci.type = "poly", ci.col = rgb(0.3,0.3,1,0.1), col = "blue", lwd = 2, ci.lty = 0, lty = 2)
 
 # legend
-legend(1, 38, legend = c("09-003", "REF-11", "REF-13"),
+legend(1, 38, legend = c("12-003", "REF-7", "REF-2015-11"),
        col = c("red", rgb(0,0.7,0), "blue"),
        lty = c(1,2,2))
 

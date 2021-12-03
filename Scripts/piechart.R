@@ -11,7 +11,7 @@ library("scales")
 # Data Import -------------------------------------------------------------
 
 # Set this value to your desired site:
-site_id <- "11-001"
+site_id <- "12-003"
 
 
 # Load comp site data
@@ -26,8 +26,13 @@ CompLong <- Comp %>%
   select(c("n_ra", "e_ra", "i_ra", "u_ra")) %>%
   transmute(Native = n_ra, Exotic = e_ra, Invasive = i_ra, Unknown = u_ra) %>%
   gather(Origin, Percent_Cover, Native:Unknown, factor_key=TRUE) %>%
-  arrange(-Percent_Cover) %>%
-  mutate(pos = (cumsum(c(0, CompLong$Percent_Cover)) + c(CompLong$Percent_Cover / 2, .01))[1:nrow(CompLong)])
+  arrange(-Percent_Cover)
+
+CompLong$Origin <- factor(CompLong$Origin,
+                          levels = CompLong$Origin[order(CompLong$Percent_Cover, decreasing = TRUE)])
+
+CompLong <- CompLong %>%
+ mutate(pos = (cumsum(c(0, CompLong$Percent_Cover)) + c(CompLong$Percent_Cover / 2, .01))[1:nrow(CompLong)])
 
 
 # Create the figure -------------------------------------------------------
@@ -35,9 +40,9 @@ CompLong <- Comp %>%
 # pie chart
 chart1 <- ggplot(CompLong, aes(x = "", y = Percent_Cover, fill = Origin)) +
   geom_col(position = position_stack(reverse = TRUE))
-chart1
+
 piechart <- chart1 + coord_polar("y")
-piechart
+
 
 # Create Blank Theme
 blank_theme <- theme_minimal()+
