@@ -38,11 +38,9 @@ CompLong <- CompLong %>%
 # Create the figure -------------------------------------------------------
 
 # pie chart
-chart1 <- ggplot(CompLong, aes(x = "", y = Percent_Cover, fill = Origin)) +
-  geom_col(position = position_stack(reverse = TRUE))
-
-piechart <- chart1 + coord_polar("y")
-
+piechart <- ggplot(CompLong, aes(x = "", y = Percent_Cover, fill = Origin)) +
+  geom_col(position = position_stack(reverse = TRUE)) +
+  coord_polar("y")
 
 # Create Blank Theme
 blank_theme <- theme_minimal()+
