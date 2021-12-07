@@ -3,6 +3,7 @@
 # Import Libraries --------------------------------------------------------
 
 library("ggplot2")
+library("ggrepel")
 library("tidyverse")
 library("scales")
 
@@ -10,7 +11,7 @@ library("scales")
 # Data Import -------------------------------------------------------------
 
 # Set this value to your desired site:
-site_id <- "02-015"
+site_id <- "12-003"
 
 
 # Load comp site data
@@ -25,18 +26,21 @@ CompLong <- Comp %>%
   select(c("n_ra", "e_ra", "i_ra", "u_ra")) %>%
   transmute(Native = n_ra, Exotic = e_ra, Invasive = i_ra, Unknown = u_ra) %>%
   gather(Origin, Percent_Cover, Native:Unknown, factor_key=TRUE) %>%
-  arrange(-Percent_Cover) %>%
-  mutate(Percent_Cover_cs = cumsum(Percent_Cover))
+  arrange(-Percent_Cover)
+
+CompLong$Origin <- factor(CompLong$Origin,
+                          levels = CompLong$Origin[order(CompLong$Percent_Cover, decreasing = TRUE)])
+
+CompLong <- CompLong %>%
+ mutate(pos = (cumsum(c(0, CompLong$Percent_Cover)) + c(CompLong$Percent_Cover / 2, .01))[1:nrow(CompLong)])
 
 
 # Create the figure -------------------------------------------------------
 
 # pie chart
-chart1 <- ggplot(CompLong, aes(x = "", y = Percent_Cover, fill = Origin)) +
-  geom_col()
-chart1
-piechart <- chart1 + coord_polar("y", start = 0, direction = 1)
-piechart
+piechart <- ggplot(CompLong, aes(x = "", y = Percent_Cover, fill = Origin)) +
+  geom_col(position = position_stack(reverse = TRUE)) +
+  coord_polar("y")
 
 # Create Blank Theme
 blank_theme <- theme_minimal()+
@@ -51,9 +55,11 @@ blank_theme <- theme_minimal()+
 
 # Final version of pie chart with blank theme and blue, colour-blind-friendly theme
 piechart + scale_fill_brewer("Blues") + blank_theme +
-  theme(axis.text.x=element_blank(), 
+  theme(axis.text.x=element_blank(),
         legend.title = element_blank(),
         legend.text= element_text(size=14))+
-  geom_text(aes(x = 1, y = Percent_Cover_cs - Percent_Cover/2,
-                label = percent(Percent_Cover/100, accuracy = 0.1)),
-            position = position_dodge(width = 0.5), size = 5)
+  geom_text_repel(aes(x = 1.4, y = pos, label = percent(Percent_Cover/100, accuracy = 0.1)), 
+                  nudge_x = .3, 
+                  segment.size = .7, 
+                  show.legend = FALSE,
+                  size = 5)
