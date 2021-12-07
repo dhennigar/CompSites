@@ -9,7 +9,7 @@ library(vegan)
 
 # global variables --------------------------------------------------------
 
-year = "2015" # SET THIS VARIABLE MANUALLY
+year = "2021" # SET THIS VARIABLE MANUALLY
 
 if (year == "2021"){
   datapath <- "./FieldData/2021/"
@@ -75,9 +75,9 @@ veg_diversity <- function(longData, plantList){
   } else {
     
     native_richness <- longData %>% 
-    veg_long_to_wide() %>% 
-    select(plantList$N) %>% 
-    specnumber()
+      veg_long_to_wide() %>% 
+      select(plantList$N) %>% 
+      specnumber()
   
     shannon_index <- longData %>% 
       veg_long_to_wide() %>%
@@ -149,23 +149,22 @@ veg_dominance <- function(longData, plant_of_interest, plantList){
     veg_long_to_wide() %>% 
     select(-plantList$S)
   
-  if(plant_of_interest == "EXO_TYPHA"){
-      if (year == "2021"){
-        wideData$EXO_TYPHA <- wideData %>% 
-          select(any_of(c("TYPHANG", "TYPHGLA"))) %>% 
-          rowSums()
-      }
-      
-      if (year == "2015"){
-        wideData$EXO_TYPHA <- wideData %>% 
-          select(any_of(c("lesser cattail", "blue cattail"))) %>% 
-          rowSums()
-      }
+  if (year == "2021"){
+    wideData$EXO_TYPHA <- wideData %>% 
+      select(any_of(c("TYPHANG", "TYPHGLA"))) %>% 
+      rowSums()
+  }
+  
+  if (year == "2015"){
+    wideData$EXO_TYPHA <- wideData %>% 
+      select(any_of(c("lesser cattail", "blue cattail"))) %>% 
+      rowSums()
   }
   
   if(plant_of_interest %in% names(wideData)){
     poi_dominance <- wideData %>% 
       select(plant_of_interest) / wideData %>% 
+      select(-EXO_TYPHA) %>% 
       rowSums()
   } else {
     poi_dominance <- rep(NA, times = length(wideData[,1]))
