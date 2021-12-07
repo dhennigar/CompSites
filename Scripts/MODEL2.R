@@ -195,7 +195,7 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #plotting model coefficients
 #names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
 plot_model(MODEL2, show.values = TRUE, value.offset = .3, title = "Relative % Cover Native", ci.lvl = .95,sort.est = TRUE,
-           axis.labels = c('Inland Basin [Y]','Distance Upriver',"Arm [North]",'Channel Proximity:Elevation','Project Age','Distance Upriver:Elevation',"Channel Proximity",'Elevation')) 
+           axis.labels = c('Inland Basin [Y]','Distance Upriver',"Project Age",'Channel Proximity:Elevation','Arm [North]','Distance Upriver:Elevation',"Channel Proximity",'Elevation')) 
 
 
 #OLD CODE (may need later)

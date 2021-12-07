@@ -91,12 +91,12 @@ M1.7 <-ggplot(FRECOMPSITES, aes(x=OFFSHORE_STRUCTURE,y=PRCNT_MUDFLAT)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
-#log fence
-M1.8 <- ggplot(FRECOMPSITES, aes(x=LOG_FENCE,y=PRCNT_MUDFLAT)) +
+#DEBRIS fence
+M1.8 <- ggplot(FRECOMPSITES, aes(x=DEBRIS_FENCE,y=PRCNT_MUDFLAT)) +
   geom_boxplot() +
   geom_jitter(alpha = 0.3) +
   geom_smooth(method = 'lm') +
-  labs(x ="Log Fence", y = "") +
+  labs(x ="Debris Fence", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 #river arm 
@@ -172,7 +172,7 @@ cowplot::plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 
 #Experimenting with all covariates (MODEL1A), and only covariates that had simple linear regression p values of <.20 (MODEL1B)
-MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND + LOG_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND + DEBRIS_FENCE + SHEAR_BOOM + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER + ARM + PRCNT_EDGE*ELEV_MEAN), data = FRECOMPSITES)
 AIC(MODEL1)
 
 #model results 
@@ -185,7 +185,6 @@ vif(MODEL1) #none above 5, so no concerns (James et al. 2014)
 #VISREG PACAKAGE: plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
 visreg(MODEL1, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast", ylab = "% Recessed Marsh")
 
-
 #plotting interaction effect
 visreg(MODEL1,"PRCNT_EDGE", by = "ELEV_MEAN", overlay=TRUE,partial = FALSE, gg=TRUE) + 
   theme_bw()+
@@ -196,7 +195,7 @@ visreg(MODEL1,"PRCNT_EDGE", by = "ELEV_MEAN", overlay=TRUE,partial = FALSE, gg=T
 #COEFFICIENT PLOT
 set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
-names(MODEL1$coefficients) <- c('Intercept','Inland Basin [Yes]','Log Fence [Present]','Shear Boom [Present]','Offshore Structure [Present]', 'Project Age', 'Size','Distance Upriver', 'Arm [North]', '% Edge', 'Mean Elevation', '% Edge:Mean Elevation')
+names(MODEL1$coefficients) <- c('Intercept','Inland Basin [Yes]','Debris Fence [Present]','Shear Boom [Present]','Offshore Structure [Present]', 'Project Age', 'Size','Distance Upriver', 'Arm [North]', '% Edge', 'Mean Elevation', '% Edge:Mean Elevation')
 plot_model(MODEL1, show.values = TRUE, value.offset = .3, title = "% Recessed Marsh", ci.lvl = .95,sort.est = TRUE)
 
 
