@@ -11,7 +11,7 @@ library("scales")
 # Data Import -------------------------------------------------------------
 
 # Set this value to your desired site:
-site_id <- "12-003"
+site_id <- "14-001"
 
 
 # Load comp site data
