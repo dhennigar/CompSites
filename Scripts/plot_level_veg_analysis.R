@@ -244,7 +244,7 @@ if (year == 2015) {
     str_replace("-1-1-", "-1-")
 }
 
-# write.csv(project_results,
-#           paste(resultpath, "plot_results", year, ".csv", sep = ""))
+write.csv(project_results,
+          paste(resultpath, "plot_results", year, ".csv", sep = ""))
 
 

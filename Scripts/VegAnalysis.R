@@ -1,17 +1,33 @@
 # Analysis script for FRE Compensation Sites
 
+
+# libraries ---------------------------------------------------------------
+
 library(tidyverse)
 library(vegan)
 
 # load veg functions
 source("./Scripts/VegFunctions.R")
 
-# set file paths
-datapath <- "./FieldData/2021/"
-resultspath <- "./Results/2021/"
-year <- "2021"
+
+# file paths --------------------------------------------------------------
+
+year = "2021" # SET THIS VARIABLE MANUALLY
+
+if (year == "2021"){
+  datapath <- "./FieldData/2021/"
+}
+
+if (year == "2015"){
+  datapath <- "./FieldData/2015/csv/"
+}
+
 files <- list.files(datapath)
 
+resultpath <-  paste("./Results/", year, "/", sep = "")
+
+
+# main loop ---------------------------------------------------------------
 
 ProjectResults <- data.frame()
 
@@ -30,7 +46,7 @@ for (i in 1:length(files)) {
   } else {
       # veg percent cover summary stats
       pcStats <- VegPercentCoverStats(vegWide)
-      write.csv(pcStats, paste(resultspath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
+      write.csv(pcStats, paste(resultpath, "PC_Stats/", "PC_Stats_", files[i], sep = ""))
       
       # site veg community statistics
       siteStats <- VegStats(vegLong, vegWide, plants)
@@ -42,6 +58,9 @@ for (i in 1:length(files)) {
   }
 }
 
+
+# data cleanup and export -------------------------------------------------
+
 ProjectResults$Site_ID <- files %>%
   str_remove(".csv")
 
@@ -49,4 +68,4 @@ ProjectResults$RA_Sum <- ProjectResults %>%
   select(c("n_ra", "e_ra", "i_ra", "u_ra")) %>%
   rowSums()
 
-write.csv(ProjectResults, paste(resultspath, "VegDataResults_", year, ".csv", sep = ""))
+write.csv(ProjectResults, paste(resultpath, "VegDataResults_", year, ".csv", sep = ""))
