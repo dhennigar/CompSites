@@ -21,7 +21,7 @@ library("MuMIn")
 
 
 #LOADING MASTER DATA .CSV 
-MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODEL2_DATACLEAN.csv") 
+MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODELS2-4/PLOTDATA_MASTER.csv") 
 
 #Ensuring Sample Year, Reference, and Project Type are factors, and ordering dummy variables as preferred
 MASTERDATA$SAMPLE_YEAR <- as.factor(MASTERDATA$SAMPLE_YEAR)

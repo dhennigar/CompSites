@@ -11,7 +11,7 @@ library("scales")
 # Data Import -------------------------------------------------------------
 
 # Set this value to your desired site:
-site_id <- "14-001"
+site_id <- ""
 
 
 # Load comp site data
@@ -24,7 +24,7 @@ Comp <- read.csv("./Results/2021/VegDataResults_2021.csv", fileEncoding = "UTF-8
 # convert to long-format for pie plotting the chart.
 CompLong <- Comp %>%
   select(c("n_ra", "e_ra", "i_ra", "u_ra")) %>%
-  transmute(Native = n_ra, Exotic = e_ra, Invasive = i_ra, Unknown = u_ra) %>%
+  transmute(Native = n_ra, Introduced = e_ra, Invasive = i_ra, Unknown = u_ra) %>%
   gather(Origin, Percent_Cover, Native:Unknown, factor_key=TRUE) %>%
   arrange(-Percent_Cover)
 
