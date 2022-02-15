@@ -74,18 +74,17 @@ FRESITES$CARELYN_MHs <-standardize(FRESITES$CARELYN_MH, centerFun = mean, scaleF
 #reference
 M3.1 <- ggplot(FRESITES, aes(x=REFERENCE,y=NAT_RICH)) +
   geom_boxplot() +
-  geom_jitter(alpha = 0.2) +
+  geom_jitter(alpha = 0.12) +
   geom_smooth(method = 'lm') +
   ylim(0,14) +
   labs(x ="Reference Site", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
-
 #arm
 M3.2 <- ggplot(FRESITES, aes(x=ARM,y=NAT_RICH)) +
   geom_boxplot() +
-  geom_jitter(alpha = 0.2) +
+  geom_jitter(alpha = 0.12) +
   geom_smooth(method = 'lm') +
   ylim(0,14) +
   labs(x ="River Arm", y = "") +
@@ -95,16 +94,16 @@ M3.2 <- ggplot(FRESITES, aes(x=ARM,y=NAT_RICH)) +
 #inland
 M3.3 <- ggplot(FRESITES, aes(x=INLAND,y=NAT_RICH)) +
   geom_boxplot() +
-  geom_jitter(alpha = 0.2) +
+  geom_jitter(alpha = 0.12) +
   geom_smooth(method = 'lm') +
   ylim(0,14) +
-  labs(x ="Inland Basin", y = "") +
+  labs(x ="Closed Embayment", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 #proximity
 M3.4 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NAT_RICH)) +
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.12) +
   geom_smooth(method = 'lm') +
   ylim(0,14) +
   labs(x ="Channel Proximity (m)", y = "Native Richness/Plot") +
@@ -113,7 +112,7 @@ M3.4 <- ggplot(FRESITES, aes(x=PROX_CHAN,y=NAT_RICH)) +
 
 #km upstream
 M3.5 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NAT_RICH)) +
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.12) +
   geom_smooth(method = 'lm') +
   ylim(0,14) +
   labs(x ="Distance Upriver (km)", y = "") +
@@ -122,7 +121,7 @@ M3.5 <- ggplot(FRESITES, aes(x=KM_UPRIVER,y=NAT_RICH)) +
 
 #elevation
 M3.6 <- ggplot(FRESITES, aes(x=ELEVATION,y=NAT_RICH)) +
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.12) +
   geom_smooth(method = 'lm') +
   labs(x ="Elevation (m)", y = "") +
   ylim(0,14) +
@@ -147,7 +146,7 @@ FRESITES$ELEVATION3group <- factor(FRESITES$ELEVATION3group, levels = c("high", 
 M3.7 <- FRESITES %>%
   ggplot() +
   aes(x = KM_UPRIVER, y = NAT_RICH, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
-  geom_point(alpha = .2) +
+  geom_point(alpha = 0.12) +
   geom_smooth(method = "lm") +
   ylim(0,14) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -158,7 +157,7 @@ M3.7 <- FRESITES %>%
 M3.7.2 <- FRESITES %>%
   ggplot() +
   aes(x = KM_UPRIVER, y = NAT_RICH, color = ELEVATION3group) +
-  geom_point(alpha = .2) +
+  geom_point(alpha = 0.12) +
   geom_smooth(method = "lm") +
   ylim(0,14) +
   theme(panel.grid.major = element_blank(), legend.box.margin = margin(-60,0,0,-10),panel.grid.minor = element_blank(),
@@ -171,10 +170,10 @@ M3.7Legend <- get_legend(M3.7.2)
 
 
 #interaction of elevation an distance upriver
-M3.7 <- FRESITES %>%
+#M3.7 <- FRESITES %>%
   ggplot() +
   aes(x = PROX_CHAN, y = NAT_RICH, group = ELEVATION3group, color = ELEVATION3group, fill =ELEVATION3group) +
-  geom_point(alpha = .2) +
+  geom_point(alpha = 0.12) +
   geom_smooth(method = "lm") +
   ylim(0,14) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -205,7 +204,7 @@ vif(MODEL3)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL3, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast",ylab = "Native Richness")
+visreg(MODEL3, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast","ELEVATION", xlab = "Elevation (m)",ylab = "Native Richness/plot")
 
 
 #plotting interaction effect
@@ -220,9 +219,11 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
 #names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
 plot_model(MODEL3, show.values = TRUE, value.offset = .3, title = "Native Richness/plot", ci.lvl = .95,sort.est = TRUE,
-           axis.labels = c('Inland Basin [Yes]','Reference [Yes]','Distance Upriver:Elevation',"Channel Proximity",'Arm [North]','Distance Upriver','Elevation')) +
+           axis.labels = c('Closed Embayment [Yes]','Reference [Yes]','Distance Upriver:Elevation',"Channel Proximity (m)",'Distance Upriver (km)','Arm [North]','Elevation (m)')) +
   ylim(-2,2)
   
+#table for appendix
+tab_model(MODEL3)
 
 
 

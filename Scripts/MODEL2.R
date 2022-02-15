@@ -51,7 +51,7 @@ M2.1 <- ggplot(FRECOMPSITES, aes(x=INLAND,y=RC_Native)) +
   geom_boxplot() +
   geom_jitter(alpha = 0.3) +
   geom_smooth(method = 'lm') +
-  labs(x ="Inland Marsh", y = "Relative % Cover Native") +
+  labs(x ="Closed Embayment", y = "Relative % Cover Native") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
@@ -69,7 +69,7 @@ M2.3 <- ggplot(FRESITES, aes(x=SAMPLING_AGE,y=RC_Native)) +
   geom_point(alpha = 0.3) +
   geom_jitter(alpha = 0.3) +
   geom_smooth(method = 'lm') +
-  labs(x ="Project Age", y = "") +
+  labs(x ="Project Age (years)", y = "") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
@@ -159,9 +159,10 @@ cowplot::plot_grid(M2TopRow , M2MidRow,M2BotRow, ncol = 1, align = "h")
 #arm*distance upriver is under the assumption that salinity/tide related stressors are more pronounced in the North Arm than Main
 # Formula for same model, sans cattail-present sites 
 MODEL2 <- lmer(RC_Native~(INLAND + ARM + SAMPLING_AGE + KM_UPRIVER*ELEVATION + PROX_CHAN*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRECOMPSITES)
-
+MODEL3 <- lmer(NAT_RICH~(INLAND + ARM + REFERENCE + PROX_CHAN + KM_UPRIVER*ELEVATION) + (1|SITE) + (1|SAMPLE_YEAR),data = FRESITES)
 #SUMMARY DATA
 summary(MODEL2) #summary table
+
 
 #getting model fit data
 r.squaredGLMM(MODEL2) 
@@ -176,7 +177,7 @@ vif(MODEL2)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL2, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast", ylab = "Relative % Cover Native")
+visreg(MODEL2, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast","INLAND",xlab = "Closed Embayment", ylab = "Relative % Cover Native")
 
 #plotting interaction effects
 visreg(MODEL2,"KM_UPRIVER", by = "ELEVATION", overlay=TRUE,partial = FALSE, gg=TRUE) + 
@@ -195,7 +196,10 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #plotting model coefficients
 #names(MODEL2A1$coefficients) <- c('Intercept','Reference Site','Sample Year','North Arm', 'Channel Proximity','Distance Upriver','Elevation', 'Distance Upriver:Elevation')
 plot_model(MODEL2, show.values = TRUE, value.offset = .3, title = "Relative % Cover Native", ci.lvl = .95,sort.est = TRUE,
-           axis.labels = c('Inland Basin [Y]','Distance Upriver',"Project Age",'Channel Proximity:Elevation','Arm [North]','Distance Upriver:Elevation',"Channel Proximity",'Elevation')) 
+           axis.labels = c('Closed Embayment [Y]','Elevation (m)',"Distance Upriver (km)",'Project Age (Years)','Elevation:Channel Proximity','Arm [North]',"Distance Upriver:Elevation",'Channel Proximity (m)')) 
+
+#produce model summary table html that can be copied into report 
+tab_model(MODEL2)
 
 
 #OLD CODE (may need later)

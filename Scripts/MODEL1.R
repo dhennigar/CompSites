@@ -5,6 +5,8 @@ library("visreg") #for model visualisation
 library("robustHD") #for model visualisation
 library("sjPlot") #for model visualisation
 library("cowplot") #for panel plots
+#library("sjmisc") # for model output table
+#library("sjlabelled") # for model output table
 
 #LOADING MASTER DATA .CSV 
 MASTERDATA <- read.csv("~/Documents/R/CompSites/FieldData/MODEL1/SiteData_Master.csv") 
@@ -64,7 +66,7 @@ M1.4 <- ggplot(FRECOMPSITES, aes(x=ELEV_MEAN,y=PRCNT_MUDFLAT)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 #percent edge habitat 
-M1.5 <- ggplot(FRECOMPSITES, aes(x=PRCNT_EDGE,y=PRCNT_MUDFLAT)) +
+M1.5 <- ggplot(FRECOMPSITES, aes(x=PRCNT_EDGE2,y=PRCNT_MUDFLAT)) +
   geom_point(alpha = 0.3) +
   geom_smooth(method = 'lm') +
   ylim(0,100) +
@@ -173,8 +175,9 @@ cowplot::plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h
 #Note that the only interaction included to date is %edge*elevation, as edge effect is likely more pronounced with lower marshes than high
 
 #Experimenting with all covariates (MODEL1A), and only covariates that had simple linear regression p values of <.20 (MODEL1B)
+#I found that there really was little benefit to using only low p-value variables, so opted to include them all
 #note: I removed debris fences because (1) there were only 5 sites (2) typha had invaded two of them, which lessened chance of bare mud, and (3) lack of fences in non-embayed sites
-MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND  + SHEAR_BOOM + SLOUGH + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER_KM + ARM + PRCNT_EDGE + ELEV_MEAN), data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND  + SHEAR_BOOM + SLOUGH + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER_KM + ARM + PRCNT_EDGE2 + ELEV_MEAN), data = FRECOMPSITES)
 AIC(MODEL1)
 
 #model results 
@@ -185,10 +188,10 @@ vif(MODEL1) #none above 5, so no concerns (James et al. 2014)
 
 #MODEL VISUALISATIONS: LIKELY FOR SUPPLEMENTAL MATERIAL 
 #VISREG PACAKAGE: plotting how the expected value of the outcome (% marsh) changes as a function of x, with all other variables in the model held fixed.
-visreg(MODEL1, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast", ylab = "% Recessed Marsh")
+visreg(MODEL1, points.par = list(pch = 16, cex = 0.8, col = "red"),type="contrast",ylab = "% Recessed Marsh")
 
 #plotting interaction effect
-visreg(MODEL1,"PRCNT_EDGE", by = "ELEV_MEAN", overlay=TRUE,partial = FALSE, gg=TRUE) + 
+visreg(MODEL1,"PRCNT_EDGE2",  overlay=TRUE,partial = FALSE, gg=TRUE) + 
   theme_bw()+
   xlab("% Edge Habitat") + ylab("% Recessed Marsh") +
   theme(panel.grid.major = element_blank(),
@@ -199,8 +202,13 @@ set_theme(base = theme_classic()) #To remove the background color and the grids
 #ploting model coefficients
 #names(MODEL1$coefficients) <- c('Mean Elevation','Debris Fence [Yes]','Shear Boom [Yes]','Offshore Structure [Present]','Slough [Yes]','Project Age','Project Size','Distance Upriver','% Edge','Closed Embayment [Yes]','Arm [North]')
 plot_model(MODEL1, show.values = TRUE, value.offset = .3, title = "% Recessed Marsh", ci.lvl = .95,sort.est = TRUE,
+           axis.lim = c(-40,30),
            axis.labels = c('Mean Elevation (m)','Offshore Structure [Present]','Shear Boom [Present]','Closed Embayment [Yes]','Slough [Yes]','Project Age (Years)','Project Size (m^2)','% Edge','Distance Upriver (km)','Arm [North]'))
          
+
+#produce model summary table html that can be copied into report 
+tab_model(MODEL1)
+
 
 #OLD CODE: Kept Just in Case
 #standardize continuous variables to be centered on the mean (mean becomes 0) using the standardize function from robustHD  
