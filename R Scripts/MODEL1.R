@@ -177,11 +177,15 @@ cowplot::plot_grid(M1TopRow , M1MidRow,M1MidRow2, M1BotRow, ncol = 1, align = "h
 #Experimenting with all covariates (MODEL1A), and only covariates that had simple linear regression p values of <.20 (MODEL1B)
 #I found that there really was little benefit to using only low p-value variables, so opted to include them all
 #note: I removed debris fences because (1) there were only 5 sites (2) typha had invaded two of them, which lessened chance of bare mud, and (3) lack of fences in non-embayed sites
-MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND  + SHEAR_BOOM + SLOUGH + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER_KM + ARM + PRCNT_EDGE2 + ELEV_MEAN), data = FRECOMPSITES)
+MODEL1 <- lm(PRCNT_MUDFLAT ~ (INLAND  + SHEAR_BOOM + SLOUGH + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER_KM + ARM + PRCNT_EDGE2 + ELEV_NEW), data = FRECOMPSITES)
 AIC(MODEL1)
+
+MODEL2 <-lm(PRCNT_MUDFLAT ~ (INLAND  + SHEAR_BOOM + SLOUGH + OFFSHORE_STRUCTURE + AGE + AREA_MAPPED + DIST_UPRIVER_KM + ARM + PRCNT_EDGE2 + ELEV_ADJ), data = FRECOMPSITES)
+AIC(MODEL2)
 
 #model results 
 summary(MODEL1) #summary table
+summary(MODEL2)
 plot(MODEL1) #plotting model fit
 #Variance inflation factor (measures how much the variance of a regression coefficient is inflated due to multicollinearity in the model) 
 vif(MODEL1) #none above 5, so no concerns (James et al. 2014)
