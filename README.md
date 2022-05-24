@@ -1,3 +1,10 @@
+# Notice:
+This work has moved to a repo administered by Project Lead, Daniel Stewart: https://github.com/asarum-ecological/FRE_CreatedTidalMarshes_2022
+
+This repository is maintained only for posterity and my personal interest.
+
+--Daniel Hennigar
+
 # Fraser River Estuary Compensation Site Data
 
 The following repo contains marsh habitat compensation site data collected in 2015 and 2021 in the Fraser River Estuary. Data from 2015 were collected by Megan Lievesley and Daniel Stewart (BC Conservation Foundation), with funding and direction from Brad Mason and Rob Knight (Community Mapping Network). Data from 2021 were collected by Daniel Hennigar and Robyn Ingham (Ducks Unlimited Canada) and Daniel Stewart (Asarum Ecological Consulting).
